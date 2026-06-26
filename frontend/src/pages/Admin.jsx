@@ -1,11 +1,18 @@
 // ============================================================
 //  PÁGINA DEL ADMIN
-//  Muestra todos los pedidos y se actualiza EN TIEMPO REAL.
-//  También deja cambiar el estado de cada pedido.
+//  Muestra todos los pedidos EN TIEMPO REAL y deja cambiar el
+//  estado de cada pedido.
 // ============================================================
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  UtensilsCrossed,
+  LayoutDashboard,
+  LogOut,
+  ChevronRight,
+  Inbox,
+} from "lucide-react";
 import { socket } from "../socket";
 import { URL_BACKEND } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
@@ -17,7 +24,6 @@ export default function Admin() {
   const admin = obtenerUsuario(); // el admin que inició sesión
   const [pedidos, setPedidos] = useState([]);
 
-  // Cierra la sesión del admin y regresa al login.
   function salir() {
     cerrarSesion();
     navegar("/login");
@@ -41,7 +47,7 @@ export default function Admin() {
       );
     });
 
-    // 4. Al salir de la página, dejamos de escuchar (buena práctica).
+    // 4. Al salir, dejamos de escuchar.
     return () => {
       socket.off("nuevo-pedido");
       socket.off("pedido-actualizado");
@@ -59,70 +65,91 @@ export default function Admin() {
   }
 
   // Pasa el pedido a la SIGUIENTE etapa automáticamente.
-  // Ejemplo: si está en "preparando", lo manda a "en camino".
   function avanzarEtapa(pedido) {
     const posicion = ETAPAS.indexOf(pedido.estado);
-    // Si todavía no es la última etapa, avanzamos a la que sigue.
     if (posicion < ETAPAS.length - 1) {
       cambiarEstado(pedido._id, ETAPAS[posicion + 1]);
     }
   }
 
   // El admin solo ve los pedidos EN PROCESO (no los entregados).
-  // OJO: no borramos nada de la base de datos; solo filtramos lo que se muestra.
   const pedidosActivos = pedidos.filter((p) => p.estado !== "entregado");
 
   return (
-    <div className="pagina">
-      <header className="barra">
-        <div className="barra-marca">🍔 Yummy</div>
-        <div className="barra-info">
-          <span className="panel-titulo">💻 Panel de Admin</span>
-          <span className="saldo">{admin.nombre}</span>
+    <div className="mx-auto max-w-2xl px-4 py-5">
+      {/* Barra superior del admin */}
+      <header className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm">
+        <div className="flex items-center gap-2 font-display text-xl font-bold text-acento">
+          <UtensilsCrossed className="h-5 w-5" /> Yummy
         </div>
-        <nav className="barra-links">
-          <button onClick={salir}>Cerrar sesión</button>
-        </nav>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-slate-500">
+            <LayoutDashboard className="h-4 w-4" /> Panel de Admin
+          </span>
+          <span className="rounded-full bg-acento-suave px-3 py-1 text-sm font-semibold text-acento-oscuro">
+            {admin.nombre}
+          </span>
+        </div>
+        <button onClick={salir} className="btn btn-ghost ml-auto">
+          <LogOut className="h-4 w-4" /> Salir
+        </button>
       </header>
 
-      <div className="lista">
-        {pedidosActivos.length === 0 && <p>No hay pedidos activos 📭</p>}
+      <div className="flex flex-col gap-3">
+        {pedidosActivos.length === 0 && (
+          <div className="tarjeta flex flex-col items-center gap-2 p-8 text-center text-slate-400">
+            <Inbox className="h-8 w-8" />
+            <p>No hay pedidos activos</p>
+          </div>
+        )}
 
         {pedidosActivos.map((pedido) => (
-          <div key={pedido._id} className="tarjeta-pedido">
-            <p>
-              <b>{pedido.usuario}</b> pidió en <b>{pedido.restaurante}</b>
+          <div key={pedido._id} className="tarjeta p-5">
+            <p className="text-slate-700">
+              <span className="font-semibold">{pedido.usuario}</span> pidió en{" "}
+              <span className="font-semibold">{pedido.restaurante}</span>
             </p>
 
-            {/* Lista de productos del pedido */}
             {pedido.productos.map((p, i) => (
-              <p key={i} className="producto">• {p.nombre} (${p.precio})</p>
+              <p key={i} className="ml-1 text-sm text-slate-500">
+                • {p.nombre} (${p.precio})
+              </p>
             ))}
 
-            <p className="total">Total: ${pedido.total}</p>
+            <p className="mt-2 text-lg font-bold text-slate-800">
+              Total: ${pedido.total}
+            </p>
 
-            {/* Barra de seguimiento: el admin ve clara la etapa actual */}
+            {/* Barra de seguimiento */}
             <SeguimientoPedido estado={pedido.estado} />
 
-            {/* Botón rápido para pasar a la siguiente etapa.
-                Se deshabilita cuando ya está "entregado". */}
+            {/* Botón rápido para pasar a la siguiente etapa */}
             <button
-              className="boton avanzar"
               onClick={() => avanzarEtapa(pedido)}
               disabled={pedido.estado === "entregado"}
+              className="btn btn-primario mt-3 w-full"
             >
-              ⏭ Avanzar a la siguiente etapa
+              <ChevronRight className="h-4 w-4" /> Avanzar a la siguiente etapa
             </button>
 
             {/* Botones para ir a un estado específico */}
-            <div className="botones">
-              <button onClick={() => cambiarEstado(pedido._id, "preparando")}>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                onClick={() => cambiarEstado(pedido._id, "preparando")}
+                className="btn btn-ghost"
+              >
                 Preparando
               </button>
-              <button onClick={() => cambiarEstado(pedido._id, "en camino")}>
+              <button
+                onClick={() => cambiarEstado(pedido._id, "en camino")}
+                className="btn btn-ghost"
+              >
                 En camino
               </button>
-              <button onClick={() => cambiarEstado(pedido._id, "entregado")}>
+              <button
+                onClick={() => cambiarEstado(pedido._id, "entregado")}
+                className="btn btn-ghost"
+              >
                 Entregado
               </button>
             </div>

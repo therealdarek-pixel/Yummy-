@@ -1,49 +1,57 @@
 // ============================================================
 //  BARRA DE SEGUIMIENTO DEL PEDIDO
-//  Recibe el "estado" actual y dibuja una barra de progreso
-//  horizontal con las 4 etapas (como cuando rastreas un pedido
-//  en una app real). Cada etapa tiene 3 posibles aspectos:
-//   - completada  -> ya pasó (verde, con ✓)
-//   - actual      -> en la que va ahora (naranja, resaltada)
-//   - pendiente   -> todavía no llega (gris)
+//  Dibuja una barra de progreso con las 4 etapas. Cada etapa es
+//  un círculo: las ya pasadas y la actual se ven en color de
+//  acento; las que faltan, en gris. Una línea se va llenando.
 // ============================================================
 
+import { Check } from "lucide-react";
 import { ETAPAS } from "../etapas";
 
 export default function SeguimientoPedido({ estado }) {
   // En qué posición (índice) va el pedido ahora.
-  // Ejemplo: "preparando" es la posición 1.
   const actual = ETAPAS.indexOf(estado);
 
-  // Cuánto se llena la línea de color (de la 1ra a la última etapa).
-  // 0% al inicio (pendiente) y 100% al final (entregado).
+  // Cuánto se llena la línea de color (0% al inicio, 100% al final).
   const avance = (actual / (ETAPAS.length - 1)) * 100;
 
-  // Decide qué aspecto tiene cada etapa según su posición.
-  function claseDeEtapa(i) {
-    if (i < actual) return "completada"; // ya la pasamos
-    if (i === actual) return "actual";   // en la que va ahora
-    return "pendiente";                  // todavía falta
-  }
-
   return (
-    <div className="seguimiento">
-      {/* Línea gris de fondo y, encima, la línea verde que avanza */}
-      <div className="linea-fondo">
-        <div className="linea-avance" style={{ width: `${avance}%` }} />
+    <div className="relative my-4">
+      {/* Línea gris de fondo y, encima, la línea de acento que avanza */}
+      <div className="absolute left-7 right-7 top-3 h-1 rounded bg-slate-200">
+        <div
+          className="h-full rounded bg-acento transition-[width] duration-500"
+          style={{ width: `${avance}%` }}
+        />
       </div>
 
       {/* Los puntos: uno por cada etapa, con su nombre debajo */}
-      <div className="etapas">
+      <div className="relative flex justify-between">
         {ETAPAS.map((etapa, i) => {
-          const clase = claseDeEtapa(i);
+          const activa = i <= actual; // ya pasó o es la actual
+          const esActual = i === actual;
           return (
-            <div key={etapa} className="etapa">
-              {/* El círculo: ✓ si ya se completó, si no el número de etapa */}
-              <div className={"punto " + clase}>
-                {clase === "completada" ? "✓" : i + 1}
+            <div
+              key={etapa}
+              className="flex w-14 flex-col items-center gap-1.5 text-center"
+            >
+              <div
+                className={
+                  "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white transition " +
+                  (activa ? "bg-acento " : "bg-slate-200 ") +
+                  (esActual ? "scale-110 ring-4 ring-acento-suave" : "")
+                }
+              >
+                {i < actual ? <Check className="h-4 w-4" /> : i + 1}
               </div>
-              <span className={"etapa-nombre " + clase}>{etapa}</span>
+              <span
+                className={
+                  "text-[11px] capitalize " +
+                  (activa ? "font-semibold text-acento" : "text-slate-400")
+                }
+              >
+                {etapa}
+              </span>
             </div>
           );
         })}

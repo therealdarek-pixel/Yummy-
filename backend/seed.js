@@ -4,8 +4,8 @@
 //  Se corre UNA SOLA VEZ con el comando:  npm run seed
 //
 //  OJO: borra y vuelve a llenar las colecciones usuarios,
-//  restaurantes y pedidos. Córrelo de nuevo si quieres que los
-//  restaurantes tengan su "categoria" (para los filtros).
+//  restaurantes y pedidos. Córrelo de nuevo para que los
+//  restaurantes tengan "categoria" y "lat"/"lng" (para el mapa).
 // ============================================================
 
 const { conectar } = require("./db");
@@ -19,7 +19,7 @@ async function llenar() {
   await bd.collection("pedidos").deleteMany({});
 
   // 2. Creamos los usuarios de ejemplo.
-  //    Cada usuario tiene correo, contraseña, si es admin y sus favoritos.
+  //    "lat" y "lng" son las coordenadas de la CASA del usuario (para el mapa).
   //    OJO: la contraseña va en texto plano porque es una práctica escolar.
   await bd.collection("usuarios").insertMany([
     // Usuario ADMIN: con este se entra al panel de pedidos.
@@ -29,7 +29,9 @@ async function llenar() {
       contraseña: "admin123",
       saldo: 0,
       esAdmin: true,
-      favoritos: [], // arreglo de ids de restaurantes favoritos (empieza vacío)
+      favoritos: [],
+      lat: 19.289,
+      lng: -99.665,
     },
     // Usuario NORMAL de ejemplo (también puedes crear los tuyos en /registro).
     {
@@ -39,17 +41,20 @@ async function llenar() {
       saldo: 500,
       esAdmin: false,
       favoritos: [],
+      lat: 19.282, // casa del usuario en Toluca
+      lng: -99.675,
     },
   ]);
 
   // 3. Creamos los restaurantes.
-  //    Cada uno tiene una "categoria" (para el buscador y los filtros).
-  //    En Mongo conviene porque el menú y el restaurante siempre van juntos.
+  //    Cada uno tiene "categoria" (para filtros) y "lat"/"lng" (para el mapa).
   await bd.collection("restaurantes").insertMany([
     {
       nombre: "Tacos El Güero",
       imagen: "🌮",
       categoria: "Mexicana",
+      lat: 19.2926,
+      lng: -99.6557,
       menu: [
         { nombre: "Taco de pastor", precio: 20 },
         { nombre: "Taco de bistec", precio: 25 },
@@ -61,6 +66,8 @@ async function llenar() {
       nombre: "Pizza Loca",
       imagen: "🍕",
       categoria: "Pizza",
+      lat: 19.2885,
+      lng: -99.6709,
       menu: [
         { nombre: "Pizza pepperoni", precio: 120 },
         { nombre: "Pizza hawaiana", precio: 130 },
@@ -72,6 +79,8 @@ async function llenar() {
       nombre: "Sushi Express",
       imagen: "🍣",
       categoria: "Sushi",
+      lat: 19.2783,
+      lng: -99.6543,
       menu: [
         { nombre: "Rollo California", precio: 95 },
         { nombre: "Rollo empanizado", precio: 110 },
@@ -83,6 +92,8 @@ async function llenar() {
       nombre: "Burger House",
       imagen: "🍔",
       categoria: "Hamburguesas",
+      lat: 19.3019,
+      lng: -99.6601,
       menu: [
         { nombre: "Hamburguesa sencilla", precio: 70 },
         { nombre: "Hamburguesa doble", precio: 95 },
@@ -90,11 +101,12 @@ async function llenar() {
         { nombre: "Malteada", precio: 50 },
       ],
     },
-    // Dos restaurantes NUEVOS para que los filtros de categoría luzcan mejor.
     {
       nombre: "Antojitos Doña Rosa",
       imagen: "🫔",
       categoria: "Mexicana",
+      lat: 19.2701,
+      lng: -99.662,
       menu: [
         { nombre: "Tamal verde", precio: 22 },
         { nombre: "Pozole chico", precio: 60 },
@@ -106,6 +118,8 @@ async function llenar() {
       nombre: "Dulce Tentación",
       imagen: "🍰",
       categoria: "Postres",
+      lat: 19.2966,
+      lng: -99.6745,
       menu: [
         { nombre: "Rebanada de pastel", precio: 55 },
         { nombre: "Brownie con helado", precio: 60 },

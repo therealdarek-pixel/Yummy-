@@ -205,9 +205,8 @@ app.post("/pedidos", async (req, res) => {
   await bd
     .collection("usuarios")
     .updateOne({ _id: new ObjectId(usuarioId) }, { $inc: { saldo: -total } });
-
-  // Guardamos el pedido (con usuarioId para saber de quién es).
-  const pedido = {
+  
+    const pedido = { // guardamos el pedido en la base de datos
     usuarioId: usuarioId,
     usuario: usuario.nombre,
     restaurante: restaurante,
@@ -218,13 +217,10 @@ app.post("/pedidos", async (req, res) => {
   };
 
   const resultado = await bd.collection("pedidos").insertOne(pedido);
-  pedido._id = resultado.insertedId; // el admin necesita el id por Socket.io
-
-  // Avisamos al admin, al instante, que llegó un pedido nuevo.
-  io.emit("nuevo-pedido", pedido);
-
-  res.json({ ok: true, saldoNuevo: usuario.saldo - total });
-});
+  pedido._id = resultado.insertedId; 
+  io.emit("nuevo-pedido", pedido); // avisamos al admin que hay un pedido nuevo
+  res.json({ ok: true, saldoNuevo: usuario.saldo - total }); // devolvemos el saldo actualizado 
+}); 
 
 // Devuelve TODOS los pedidos, del más nuevo al más viejo (panel del admin).
 app.get("/pedidos", async (req, res) => {
@@ -260,13 +256,10 @@ app.put("/pedidos/:id", async (req, res) => {
   const { estado } = req.body;
 
   await bd
-    .collection("pedidos")
-    .updateOne({ _id: id }, { $set: { estado: estado } });
-
-  // Avisamos a todos que el pedido cambió (para que el usuario lo vea).
+    .collection("pedidos") 
+    .updateOne({ _id: id }, { $set: { estado: estado } }); // actualiza el estado del pedido en la base de datos
   io.emit("pedido-actualizado", { id: req.params.id, estado: estado });
-
-  res.json({ ok: true });
+  res.json({ ok: true }); // respondemos que todo salió bien
 });
 
 // Guarda la CALIFICACIÓN (1 a 5 estrellas) de un pedido ya entregado.
@@ -274,7 +267,6 @@ app.put("/pedidos/:id/calificacion", async (req, res) => {
   const bd = await conectar();
   const id = new ObjectId(req.params.id);
   const { calificacion } = req.body;
-
   await bd
     .collection("pedidos")
     .updateOne({ _id: id }, { $set: { calificacion: calificacion } });

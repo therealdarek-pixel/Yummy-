@@ -1,17 +1,15 @@
 // ============================================================
 //  BARRA DE NAVEGACIÓN (lado del usuario)
-//  Barra superior elegante que se ve IGUAL en todas las
-//  pantallas del usuario. Muestra el logo "Yummy", su nombre,
-//  su saldo y los botones para moverse + "Cerrar sesión".
+//  Barra superior elegante e igual en todas las pantallas del
+//  usuario: logo "Yummy", nombre, saldo y botones de navegar.
 //
-//  La prop "saldo" es OPCIONAL:
-//   - Si la pantalla nos pasa el saldo, lo mostramos (sirve para
-//     que se actualice al instante, por ejemplo al recargar).
-//   - Si NO nos lo pasan, la barra lo busca sola en el backend.
+//  La prop "saldo" es OPCIONAL: si la pantalla nos la pasa, la
+//  mostramos; si no, la barra la busca sola en el backend.
 // ============================================================
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { UtensilsCrossed, Wallet, Store, ReceiptText, LogOut } from "lucide-react";
 import { URL_BACKEND } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
 
@@ -29,33 +27,42 @@ export default function BarraNavegacion({ saldo }) {
     }
   }, []);
 
-  // El saldo que vamos a mostrar: el de la pantalla o el que buscamos.
   const saldoAMostrar = saldo !== undefined ? saldo : saldoBuscado;
 
-  // Cierra la sesión y regresa al login.
   function salir() {
     cerrarSesion();
     navegar("/login");
   }
 
   return (
-    <header className="barra">
-      {/* Logo / nombre de la marca */}
-      <div className="barra-marca">🍔 Yummy</div>
+    <header className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-sm">
+      {/* Logo / marca */}
+      <div className="flex items-center gap-2 font-display text-xl font-bold text-acento">
+        <UtensilsCrossed className="h-5 w-5" />
+        Yummy
+      </div>
 
-      {/* Saludo y saldo del usuario */}
-      <div className="barra-info">
-        <b>Hola, {usuario.nombre}</b>
+      {/* Saludo + saldo */}
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <span className="font-semibold text-slate-700">Hola, {usuario.nombre}</span>
         {saldoAMostrar !== null && (
-          <span className="saldo">💰 ${saldoAMostrar}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-acento-suave px-3 py-1 text-sm font-semibold text-acento-oscuro">
+            <Wallet className="h-4 w-4" />${saldoAMostrar}
+          </span>
         )}
       </div>
 
       {/* Navegación + cerrar sesión */}
-      <nav className="barra-links">
-        <Link to="/usuario" className="boton">Restaurantes</Link>
-        <Link to="/usuario/historial" className="boton">Mis pedidos</Link>
-        <button onClick={salir}>Cerrar sesión</button>
+      <nav className="ml-auto flex flex-wrap items-center gap-2">
+        <Link to="/usuario" className="btn btn-ghost">
+          <Store className="h-4 w-4" /> Restaurantes
+        </Link>
+        <Link to="/usuario/historial" className="btn btn-ghost">
+          <ReceiptText className="h-4 w-4" /> Mis pedidos
+        </Link>
+        <button onClick={salir} className="btn btn-ghost">
+          <LogOut className="h-4 w-4" /> Salir
+        </button>
       </nav>
     </header>
   );
