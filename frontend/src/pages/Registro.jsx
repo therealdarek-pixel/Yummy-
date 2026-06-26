@@ -21,6 +21,7 @@ export default function Registro() {
   async function registrar(evento) {
     evento.preventDefault();
 
+//se manda la información al backend para crear la cuenta del usuario
     const respuesta = await fetch(`${URL_BACKEND}/registro`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

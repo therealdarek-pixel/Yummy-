@@ -1,15 +1,5 @@
 // ============================================================
 //  SERVIDOR PRINCIPAL
-//  Aquí están todas las rutas (lo que el frontend le pide al backend)
-//  y también el "tiempo real" con Socket.io.
-//
-//  Todas las rutas siguen el MISMO patrón para que sean fáciles de leer:
-//    1) obtenemos la base de datos,
-//    2) leemos los datos que entran (req.params / req.body),
-//    3) hacemos la operación de Mongo,
-//    4) respondemos con res.json(...).
-// ============================================================
-
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -17,9 +7,7 @@ const { Server } = require("socket.io");
 const { ObjectId } = require("mongodb");
 const { conectar } = require("./db");
 
-// El origen permitido (el frontend) viene de una variable de entorno.
-// - En tu compu usa "*" (cualquiera), para que funcione fácil en localhost.
-// - En Render se pondrá FRONTEND_URL con la dirección de tu frontend en Vercel.
+// Definimos la Variable que dice desde qué frontend se puede hablar con el backend 
 const FRONTEND = process.env.FRONTEND_URL || "*";
 
 const app = express();
@@ -141,9 +129,7 @@ app.get("/restaurantes", async (req, res) => {
   res.json(lista);
 });
 
-// Devuelve el promedio de estrellas de cada restaurante, contando solo
-// pedidos entregados y ya calificados. Responde un objeto { nombre: promedio }.
-// Va ANTES de "/restaurantes/:id" para que Express no tome "promedios" como id.
+// Devuelve el promedio de estrellas de cada restaurante
 app.get("/restaurantes/promedios", async (req, res) => {
   const bd = await conectar();
 

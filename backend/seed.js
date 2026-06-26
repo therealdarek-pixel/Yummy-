@@ -1,13 +1,4 @@
-// ============================================================
-//  DATOS DE EJEMPLO (SEED)
-//  Este archivo LLENA la base de datos con datos de prueba.
-//  Se corre UNA SOLA VEZ con el comando:  npm run seed
-//
-//  OJO: borra y vuelve a llenar las colecciones usuarios,
-//  restaurantes y pedidos. Córrelo de nuevo para que los
-//  restaurantes tengan "categoria" y "lat"/"lng" (para el mapa).
-// ============================================================
-
+// Este archivo sirve para llenar la base de datos con datos de ejemplo.
 const { conectar } = require("./db");
 
 async function llenar() {
@@ -19,8 +10,6 @@ async function llenar() {
   await bd.collection("pedidos").deleteMany({});
 
   // 2. Creamos los usuarios de ejemplo.
-  //    "lat" y "lng" son las coordenadas de la CASA del usuario (para el mapa).
-  //    OJO: la contraseña va en texto plano porque es una práctica escolar.
   await bd.collection("usuarios").insertMany([
     // Usuario ADMIN: con este se entra al panel de pedidos.
     {

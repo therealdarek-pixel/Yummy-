@@ -2,7 +2,7 @@
 //  BARRA DE SEGUIMIENTO DEL PEDIDO
 //  Dibuja una barra de progreso con las 4 etapas. Cada etapa es
 //  un círculo: las ya pasadas y la actual se ven en color de
-//  acento; las que faltan, en gris. Una línea se va llenando.
+//  acento las que faltan, en gris. Una línea se va llenando.
 // ============================================================
 
 import { Check } from "lucide-react";

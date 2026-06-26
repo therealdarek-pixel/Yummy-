@@ -1,5 +1,4 @@
-// Esta es la conexión en TIEMPO REAL con el servidor.
-// Sirve para que el admin vea pedidos al instante y el usuario vea los cambios.
+// la libreria de socket.io-client nos permite conectarnos al backend con WebSockets
 import { io } from "socket.io-client";
 import { URL_BACKEND } from "./api";
 

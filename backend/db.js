@@ -2,16 +2,9 @@
 //  Aquí nos conectamos a la base de datos una sola vez.
 
 const { MongoClient } = require("mongodb");
-
-// La URL de Mongo viene de una variable de entorno.
-// - En tu compu (localhost) usa el valor por defecto.
-// - En Render se pondrá MONGO_URL con la cadena de conexión de MongoDB Atlas.
 const URL = process.env.MONGO_URL || "mongodb://localhost:27017";
 
-// OJO: NO cambiar este nombre. La base de datos ya se llama "didifood" en
-// MongoDB Atlas y tiene los datos cargados; renombrarla los "perdería".
-// (El nombre de la BD es interno y no se ve en la app, así que la marca
-//  "Yummy" no lo afecta.)
+//nombre de la base de datos
 const NOMBRE_BD = "didifood";
 
 const cliente = new MongoClient(URL);

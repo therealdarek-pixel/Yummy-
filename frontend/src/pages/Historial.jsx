@@ -1,10 +1,4 @@
-// ============================================================
-//  PÁGINA DE HISTORIAL
-//  Muestra los pedidos PASADOS del usuario y se actualiza en
-//  TIEMPO REAL cuando el admin cambia el estado. Cada pedido
-//  tiene: barra de etapas, MAPA del repartidor acercándose,
-//  calificación con estrellas (al entregar) y "Repetir pedido".
-// ============================================================
+//muestra el historial de pedidos del usuario logueado, con mapa y calificación
 
 import { useState, useEffect } from "react";
 import { CheckCircle2, RotateCcw, ReceiptText } from "lucide-react";

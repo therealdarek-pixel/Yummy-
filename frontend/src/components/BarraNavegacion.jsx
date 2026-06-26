@@ -1,12 +1,6 @@
 // ============================================================
-//  BARRA DE NAVEGACIÓN (lado del usuario)
-//  Barra superior elegante e igual en todas las pantallas del
-//  usuario: logo "Yummy", nombre, saldo y botones de navegar.
-//
-//  La prop "saldo" es OPCIONAL: si la pantalla nos la pasa, la
-//  mostramos; si no, la barra la busca sola en el backend.
-// ============================================================
-
+//  BARRA DE NAVEGACIÓN DEL USUARIO
+//sirve para mostrar el saldo, el nombre del usuario y los links a restaurantes, historial y cerrar sesión
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UtensilsCrossed, Wallet, Store, ReceiptText, LogOut } from "lucide-react";
