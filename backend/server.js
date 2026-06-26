@@ -2,6 +2,12 @@
 //  SERVIDOR PRINCIPAL
 //  Aquí están todas las rutas (lo que el frontend le pide al backend)
 //  y también el "tiempo real" con Socket.io.
+//
+//  Todas las rutas siguen el MISMO patrón para que sean fáciles de leer:
+//    1) obtenemos la base de datos,
+//    2) leemos los datos que entran (req.params / req.body),
+//    3) hacemos la operación de Mongo,
+//    4) respondemos con res.json(...).
 // ============================================================
 
 const express = require("express");
@@ -18,37 +24,31 @@ const FRONTEND = process.env.FRONTEND_URL || "*";
 
 const app = express();
 app.use(cors({ origin: FRONTEND })); // permite que el frontend hable con el backend
-app.use(express.json());             // permite leer datos en formato JSON
+app.use(express.json()); // permite leer datos en formato JSON
 
 // Creamos el servidor y le pegamos Socket.io (para avisar cosas al instante).
 const servidor = http.createServer(app);
 const io = new Server(servidor, { cors: { origin: FRONTEND } });
 
-// Cuando alguien se conecta por tiempo real, solo lo avisamos en consola.
 io.on("connection", () => {
   console.log("Alguien se conectó en tiempo real 🔌");
 });
 
 // ============================================================
-//  RUTAS
+//  USUARIOS: REGISTRO Y LOGIN
 // ============================================================
 
-// ------------------------------------------------------------
-//  REGISTRO Y LOGIN
-// ------------------------------------------------------------
-
-// Crea un usuario NUEVO. Empieza con saldo de $500 y NO es admin.
+// Crea un usuario nuevo (empieza con $500 de saldo y NO es admin).
 app.post("/registro", async (req, res) => {
   const bd = await conectar();
   const { nombre, correo, contraseña } = req.body;
 
-  // 1. Revisamos que el correo no esté ya usado.
+  // Si el correo ya está registrado, no dejamos crear otra cuenta.
   const yaExiste = await bd.collection("usuarios").findOne({ correo: correo });
   if (yaExiste) {
     return res.status(400).json({ error: "Ese correo ya está registrado 😅" });
   }
 
-  // 2. Guardamos el usuario nuevo.
   const nuevo = {
     nombre: nombre,
     correo: correo,
@@ -56,24 +56,22 @@ app.post("/registro", async (req, res) => {
     saldo: 500,
     esAdmin: false,
   };
-  const resultado = await bd.collection("usuarios").insertOne(nuevo);
-  nuevo._id = resultado.insertedId;
 
-  // 3. Le respondemos con su usuario ya creado.
+  const resultado = await bd.collection("usuarios").insertOne(nuevo);
+  nuevo._id = resultado.insertedId; // el frontend necesita el id del usuario
+
   res.json(nuevo);
 });
 
-// Inicia sesión: compara correo y contraseña de forma directa.
+// Inicia sesión: busca un usuario con ese correo y esa contraseña.
 app.post("/login", async (req, res) => {
   const bd = await conectar();
   const { correo, contraseña } = req.body;
 
-  // Buscamos un usuario con ESE correo y ESA contraseña.
   const usuario = await bd
     .collection("usuarios")
     .findOne({ correo: correo, contraseña: contraseña });
 
-  // Si no lo encontramos, los datos están mal.
   if (!usuario) {
     return res.status(400).json({ error: "Correo o contraseña incorrectos 🙈" });
   }
@@ -84,72 +82,131 @@ app.post("/login", async (req, res) => {
 // Devuelve UN usuario por su id (para mostrar su saldo actualizado).
 app.get("/usuarios/:id", async (req, res) => {
   const bd = await conectar();
-  const usuario = await bd
-    .collection("usuarios")
-    .findOne({ _id: new ObjectId(req.params.id) });
+  const id = new ObjectId(req.params.id);
+
+  const usuario = await bd.collection("usuarios").findOne({ _id: id });
+
   res.json(usuario);
 });
 
 // Recarga saldo al usuario (le suma una cantidad, por ejemplo $100).
 app.post("/usuarios/:id/recargar", async (req, res) => {
   const bd = await conectar();
+  const id = new ObjectId(req.params.id);
   const { cantidad } = req.body;
 
-  // Le sumamos la cantidad a su saldo.
   await bd
     .collection("usuarios")
-    .updateOne(
-      { _id: new ObjectId(req.params.id) },
-      { $inc: { saldo: cantidad } }
-    );
+    .updateOne({ _id: id }, { $inc: { saldo: cantidad } });
 
-  // Devolvemos el usuario ya con su saldo nuevo.
-  const usuario = await bd
-    .collection("usuarios")
-    .findOne({ _id: new ObjectId(req.params.id) });
+  const usuario = await bd.collection("usuarios").findOne({ _id: id });
+
   res.json({ ok: true, saldoNuevo: usuario.saldo });
 });
+
+// Agrega o quita un restaurante de los FAVORITOS del usuario.
+// Funciona como interruptor: si ya estaba, lo quita; si no, lo agrega.
+app.post("/usuarios/:id/favoritos/:restauranteId", async (req, res) => {
+  const bd = await conectar();
+  const id = new ObjectId(req.params.id);
+  const restauranteId = req.params.restauranteId;
+
+  const usuario = await bd.collection("usuarios").findOne({ _id: id });
+  const favoritos = usuario.favoritos || [];
+
+  let nuevos;
+  if (favoritos.includes(restauranteId)) {
+    nuevos = favoritos.filter((favorito) => favorito !== restauranteId);
+  } else {
+    nuevos = [...favoritos, restauranteId];
+  }
+
+  await bd
+    .collection("usuarios")
+    .updateOne({ _id: id }, { $set: { favoritos: nuevos } });
+
+  res.json({ favoritos: nuevos });
+});
+
+// ============================================================
+//  RESTAURANTES
+// ============================================================
 
 // Devuelve TODOS los restaurantes.
 app.get("/restaurantes", async (req, res) => {
   const bd = await conectar();
+
   const lista = await bd.collection("restaurantes").find().toArray();
+
   res.json(lista);
+});
+
+// Devuelve el promedio de estrellas de cada restaurante, contando solo
+// pedidos entregados y ya calificados. Responde un objeto { nombre: promedio }.
+// Va ANTES de "/restaurantes/:id" para que Express no tome "promedios" como id.
+app.get("/restaurantes/promedios", async (req, res) => {
+  const bd = await conectar();
+
+  // Traemos los pedidos entregados que ya tienen calificación.
+  const pedidos = await bd
+    .collection("pedidos")
+    .find({ estado: "entregado", calificacion: { $gte: 1 } })
+    .toArray();
+
+  // Sumamos las estrellas y contamos cuántas hay por restaurante.
+  const sumas = {};
+  pedidos.forEach((pedido) => {
+    const nombre = pedido.restaurante;
+    if (!sumas[nombre]) {
+      sumas[nombre] = { suma: 0, cuenta: 0 };
+    }
+    sumas[nombre].suma += pedido.calificacion;
+    sumas[nombre].cuenta += 1;
+  });
+
+  // El promedio es la suma entre la cuenta.
+  const promedios = {};
+  for (const nombre in sumas) {
+    promedios[nombre] = sumas[nombre].suma / sumas[nombre].cuenta;
+  }
+
+  res.json(promedios);
 });
 
 // Devuelve UN restaurante por su id (con su menú adentro).
 app.get("/restaurantes/:id", async (req, res) => {
   const bd = await conectar();
-  const uno = await bd
-    .collection("restaurantes")
-    .findOne({ _id: new ObjectId(req.params.id) });
-  res.json(uno);
+  const id = new ObjectId(req.params.id);
+
+  const restaurante = await bd.collection("restaurantes").findOne({ _id: id });
+
+  res.json(restaurante);
 });
 
-// Crea un PEDIDO nuevo.
+// ============================================================
+//  PEDIDOS
+// ============================================================
+
+// Crea un PEDIDO nuevo (revisa el saldo, lo descuenta y avisa al admin).
 app.post("/pedidos", async (req, res) => {
   const bd = await conectar();
-
-  // Estos datos vienen del frontend (lo que el usuario pidió).
   const { usuarioId, restaurante, productos, total } = req.body;
 
-  // 1. Buscamos al usuario.
   const usuario = await bd
     .collection("usuarios")
     .findOne({ _id: new ObjectId(usuarioId) });
 
-  // 2. Revisamos que le alcance el saldo.
+  // Si no le alcanza el saldo, no creamos el pedido.
   if (usuario.saldo < total) {
     return res.status(400).json({ error: "Saldo insuficiente 😢" });
   }
 
-  // 3. Le descontamos el dinero del monedero.
+  // Le descontamos el total a su saldo.
   await bd
     .collection("usuarios")
     .updateOne({ _id: new ObjectId(usuarioId) }, { $inc: { saldo: -total } });
 
-  // 4. Guardamos el pedido en la base de datos.
-  //    Guardamos también el id del usuario para saber DE QUIÉN es el pedido.
+  // Guardamos el pedido (con usuarioId para saber de quién es).
   const pedido = {
     usuarioId: usuarioId,
     usuario: usuario.nombre,
@@ -159,49 +216,68 @@ app.post("/pedidos", async (req, res) => {
     estado: "pendiente",
     fecha: new Date(),
   };
-  const resultado = await bd.collection("pedidos").insertOne(pedido);
-  pedido._id = resultado.insertedId; // le pegamos el id que generó Mongo
 
-  // 5. Avisamos al ADMIN, al instante, que llegó un pedido nuevo.
+  const resultado = await bd.collection("pedidos").insertOne(pedido);
+  pedido._id = resultado.insertedId; // el admin necesita el id por Socket.io
+
+  // Avisamos al admin, al instante, que llegó un pedido nuevo.
   io.emit("nuevo-pedido", pedido);
 
-  // 6. Le respondemos al usuario con su saldo ya actualizado.
   res.json({ ok: true, saldoNuevo: usuario.saldo - total });
 });
 
-// Devuelve TODOS los pedidos (para el panel del admin).
+// Devuelve TODOS los pedidos, del más nuevo al más viejo (panel del admin).
 app.get("/pedidos", async (req, res) => {
   const bd = await conectar();
+
   const lista = await bd
     .collection("pedidos")
     .find()
-    .sort({ fecha: -1 }) // los más nuevos primero
+    .sort({ fecha: -1 })
     .toArray();
+
   res.json(lista);
 });
 
 // Devuelve solo los pedidos DE UN usuario (su historial).
 app.get("/pedidos/usuario/:id", async (req, res) => {
   const bd = await conectar();
+  const usuarioId = req.params.id;
+
   const lista = await bd
     .collection("pedidos")
-    .find({ usuarioId: req.params.id })
-    .sort({ fecha: -1 }) // los más nuevos primero
+    .find({ usuarioId: usuarioId })
+    .sort({ fecha: -1 })
     .toArray();
+
   res.json(lista);
 });
 
-// Cambia el ESTADO de un pedido (pendiente -> preparando -> etc).
+// Cambia el ESTADO de un pedido (pendiente -> preparando -> etc.).
 app.put("/pedidos/:id", async (req, res) => {
   const bd = await conectar();
+  const id = new ObjectId(req.params.id);
   const { estado } = req.body;
 
   await bd
     .collection("pedidos")
-    .updateOne({ _id: new ObjectId(req.params.id) }, { $set: { estado: estado } });
+    .updateOne({ _id: id }, { $set: { estado: estado } });
 
-  // Avisamos a TODOS que el pedido cambió (para que el usuario lo vea).
+  // Avisamos a todos que el pedido cambió (para que el usuario lo vea).
   io.emit("pedido-actualizado", { id: req.params.id, estado: estado });
+
+  res.json({ ok: true });
+});
+
+// Guarda la CALIFICACIÓN (1 a 5 estrellas) de un pedido ya entregado.
+app.put("/pedidos/:id/calificacion", async (req, res) => {
+  const bd = await conectar();
+  const id = new ObjectId(req.params.id);
+  const { calificacion } = req.body;
+
+  await bd
+    .collection("pedidos")
+    .updateOne({ _id: id }, { $set: { calificacion: calificacion } });
 
   res.json({ ok: true });
 });

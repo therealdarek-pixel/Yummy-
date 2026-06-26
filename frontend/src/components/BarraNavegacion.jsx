@@ -1,8 +1,8 @@
 // ============================================================
 //  BARRA DE NAVEGACIÓN (lado del usuario)
-//  Barra superior que se ve IGUAL en todas las pantallas del
-//  usuario. Muestra su nombre, su saldo y botones para moverse
-//  entre pantallas, además de "Cerrar sesión" siempre visible.
+//  Barra superior elegante que se ve IGUAL en todas las
+//  pantallas del usuario. Muestra el logo "Yummy", su nombre,
+//  su saldo y los botones para moverse + "Cerrar sesión".
 //
 //  La prop "saldo" es OPCIONAL:
 //   - Si la pantalla nos pasa el saldo, lo mostramos (sirve para
@@ -40,7 +40,10 @@ export default function BarraNavegacion({ saldo }) {
 
   return (
     <header className="barra">
-      {/* Lado izquierdo: nombre y saldo del usuario */}
+      {/* Logo / nombre de la marca */}
+      <div className="barra-marca">🍔 Yummy</div>
+
+      {/* Saludo y saldo del usuario */}
       <div className="barra-info">
         <b>Hola, {usuario.nombre}</b>
         {saldoAMostrar !== null && (
@@ -48,11 +51,11 @@ export default function BarraNavegacion({ saldo }) {
         )}
       </div>
 
-      {/* Lado derecho: botones para moverse y cerrar sesión */}
+      {/* Navegación + cerrar sesión */}
       <nav className="barra-links">
-        <Link to="/usuario" className="boton">🍔 Restaurantes</Link>
-        <Link to="/usuario/historial" className="boton">📜 Mis pedidos</Link>
-        <button onClick={salir}>🚪 Cerrar sesión</button>
+        <Link to="/usuario" className="boton">Restaurantes</Link>
+        <Link to="/usuario/historial" className="boton">Mis pedidos</Link>
+        <button onClick={salir}>Cerrar sesión</button>
       </nav>
     </header>
   );

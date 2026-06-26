@@ -1,7 +1,7 @@
 {
   "name": "didi-food-backend",
   "version": "1.0.0",
-  "description": "Backend de un DiDi Food simple con Node, Express, MongoDB y Socket.io",
+  "description": "Backend de Yummy (app de pedidos) con Node, Express, MongoDB y Socket.io",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

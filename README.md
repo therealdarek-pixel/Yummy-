@@ -1,9 +1,11 @@
-# 🍔 DiDi Food (versión simple)
+# 🍔 Yummy (versión simple)
 
 Proyecto de Base de Datos NO relacional con **MongoDB**.
-Tiene dos lados:
-- **Usuario** (`/usuario`): se registra, inicia sesión, ve restaurantes, pide
-  comida (se le descuenta SU saldo), recarga saldo y revisa su historial.
+**Yummy** es una app de pedidos de comida con dos lados:
+- **Usuario** (`/usuario`): se registra, inicia sesión, **busca restaurantes y
+  filtra por categoría**, marca **favoritos** ❤️, pide comida (se le descuenta SU
+  saldo), recarga saldo, revisa su historial, **califica con estrellas** ⭐ los
+  pedidos entregados y puede **repetir un pedido** 🔁.
 - **Admin** (`/admin`): inicia sesión como admin, ve los pedidos EN TIEMPO REAL
   y cambia su estado.
 
@@ -12,9 +14,12 @@ del navegador (sin JWT ni librerías). Las contraseñas se comparan en texto
 plano porque es una práctica escolar.
 
 ## 🧩 Tecnologías
-- **Backend:** Node.js + Express + MongoDB + Socket.io
-- **Frontend:** React (con Vite)
+- **Backend:** Node.js + Express + MongoDB (driver nativo) + Socket.io
+- **Frontend:** React (con Vite) + CSS normal (sin librerías de UI)
 - **Base de datos:** MongoDB (3 colecciones: usuarios, restaurantes, pedidos)
+
+> La base de datos sigue llamándose internamente `didifood` (no se ve en la app);
+> la marca visible es **Yummy**.
 
 ---
 
@@ -23,12 +28,13 @@ plano porque es una práctica escolar.
 didi-food/
 ├── backend/        <- el servidor (Node + Mongo + Socket.io)
 │   ├── db.js       <- conexión a MongoDB
-│   ├── seed.js     <- datos de ejemplo
+│   ├── seed.js     <- datos de ejemplo (con categorías)
 │   └── server.js   <- todas las rutas
 └── frontend/       <- la página web (React)
     └── src/
-        ├── pages/  <- Usuario, Restaurante y Admin
-        ├── api.js  <- dirección del backend
+        ├── pages/       <- Login, Registro, Usuario, Restaurante, Historial, Admin
+        ├── components/  <- BarraNavegacion, SeguimientoPedido, Estrellas
+        ├── api.js       <- dirección del backend
         └── socket.js
 ```
 
@@ -39,8 +45,7 @@ didi-food/
 ### Paso 1 — Tener MongoDB listo
 Tienes 2 opciones:
 - **A)** Instalar MongoDB en tu compu (queda en `localhost`). No cambias nada.
-- **B)** Usar MongoDB Atlas (en internet). En ese caso abre `backend/db.js`
-  y pega tu cadena de conexión donde dice la nota.
+- **B)** Usar MongoDB Atlas (en internet) con la variable de entorno `MONGO_URL`.
 
 ### Paso 2 — Prender el BACKEND
 Abre una terminal y escribe:
@@ -50,7 +55,7 @@ npm install
 npm run seed     <- esto carga los datos de ejemplo (solo la 1ra vez)
 npm start        <- esto prende el servidor
 ```
-Debe decir: `Servidor encendido en http://localhost:3000 🚀`
+Debe decir: `Servidor encendido en el puerto 3000 🚀`
 👉 Deja esta terminal abierta.
 
 ### Paso 3 — Prender el FRONTEND
@@ -82,97 +87,81 @@ Como su usuario tiene `esAdmin: true`, al iniciar sesión te manda solito a
 > Si entras a `/usuario` o `/admin` SIN haber iniciado sesión, te regresa al
 > login. Usa el botón **"Cerrar sesión"** para salir.
 
-### Cosas que puede hacer el usuario
+---
+
+## ✨ Funciones del usuario
+
+### 🔍 Buscador y categorías
+En la pantalla del usuario hay un **buscador** que filtra los restaurantes por
+nombre **mientras escribes**, y unos **chips de categoría** (Mexicana, Pizza,
+Sushi, Hamburguesas, Postres…) para filtrar con un clic. El filtrado se hace en
+el frontend sobre la lista ya cargada (simple y rápido).
+
+### ❤️ Favoritos
+Cada restaurante tiene un **corazón** para marcarlo como favorito. Los favoritos
+se guardan en el documento del usuario (campo `favoritos`, un arreglo de ids).
+Con el chip **"❤️ Favoritos"** puedes ver solo tus favoritos.
+
+### ⭐ Calificaciones
+Cuando un pedido llega a **"entregado"**, en tu historial aparecen **estrellas
+(1 a 5)** para calificarlo. Una vez calificado, las estrellas quedan fijas. La
+calificación se guarda en el pedido (campo `calificacion`). En la tarjeta de
+cada restaurante se muestra el **promedio** de estrellas de sus pedidos
+entregados (si ya tiene calificaciones).
+
+### 🔁 Repetir pedido
+En el historial, cada pedido tiene un botón **"Repetir pedido"** que vuelve a
+crear el mismo pedido (mismos productos y total) si te alcanza el saldo. Reusa
+la misma lógica de crear pedido.
+
+### 💰 Saldo e historial
 - **Recargar saldo:** botón "➕ Recargar $100" (se refleja al instante, también
   en la barra de arriba).
-- **Ver su historial:** botón "📜 Mis pedidos" (`/usuario/historial`). Ahí ve
-  SUS pedidos (del más nuevo al más viejo) y su estado se actualiza en tiempo
-  real cuando el admin lo cambia.
+- **Ver su historial:** botón "📜 Mis pedidos". Ahí ve SUS pedidos (del más nuevo
+  al más viejo) y su estado se actualiza en tiempo real cuando el admin lo cambia.
 
-### 🧭 Navegación (cómo te mueves sin atorarte)
-Todas las pantallas del usuario tienen una **barra de navegación arriba** que
-siempre muestra:
-- Tu **nombre** y tu **saldo**.
-- Botones **🍔 Restaurantes** y **📜 Mis pedidos** para ir de una pantalla a otra.
-- **🚪 Cerrar sesión** (borra la sesión y te regresa al login).
+### 🧭 Navegación
+Todas las pantallas del usuario tienen una **barra superior** elegante con el
+logo **Yummy**, tu **nombre**, tu **saldo** y botones para moverte
+(**Restaurantes**, **Mis pedidos**, **Cerrar sesión**).
 
-Dentro del menú de un restaurante hay un botón **← Regresar** para volver a la
-pantalla anterior.
+---
 
-**Flujo completo (sin callejones sin salida):**
-```
-login  →  lista de restaurantes  →  menú del restaurante  →  confirmar pedido
-       →  (te lleva solo a) "Mis pedidos"  →  y desde la barra vuelves a
-          "Restaurantes" para pedir otra vez.
-```
-
-### Panel del admin
-- Encabezado con el **nombre del admin** y su botón **🚪 Cerrar sesión**.
+## 💻 Panel del admin
+- Encabezado con el logo **Yummy**, el **nombre del admin** y **Cerrar sesión**.
 - Lista de pedidos **en tiempo real** (aparecen solos cuando alguien pide).
 - Botones en cada pedido para cambiar su estado: **preparando**, **en camino**,
-  **entregado**. El usuario ve ese cambio al instante en su historial.
+  **entregado**, más un botón **"⏭ Avanzar a la siguiente etapa"**. El usuario ve
+  ese cambio al instante en su historial.
 
 ### 🚥 Seguimiento del pedido por etapas
-Cada pedido ahora muestra una **barra de progreso** con 4 etapas en orden:
-**pendiente → preparando → en camino → entregado**. Cada etapa es un círculo con
-su nombre; los círculos por los que ya pasó el pedido se ven en **naranja** (con
-✓) y los que faltan en **gris**, y una línea naranja se va llenando según avanza.
+Cada pedido muestra una **barra de progreso** con 4 etapas en orden:
+**pendiente → preparando → en camino → entregado**. Las 4 etapas están definidas
+en UN SOLO lugar: `frontend/src/etapas.js`.
 
-- En **"Mis pedidos"** (usuario) la barra muestra en qué etapa va su comida.
-- En el **panel del admin** la barra aparece arriba de los botones.
-- Como ya usamos **Socket.io**, cuando el admin avanza el estado, la barra del
-  usuario avanza **al instante**, sin recargar.
-
-> Las 4 etapas están definidas en UN SOLO lugar: `frontend/src/etapas.js`. Si
-> quieres cambiarlas o agregar una, solo editas ese archivo.
-
-> 🎨 La barra usa 3 colores: **verde** las etapas ya completadas (con ✓),
-> **naranja** la etapa actual (resaltada) y **gris** las que faltan.
-
-### 📦 ¿Qué pasa cuando un pedido se marca "entregado"?
-- En el **panel del admin** el pedido **desaparece** de la lista (el admin solo
-  ve los pedidos en proceso: pendiente, preparando, en camino). Esto se hace
-  **filtrando** lo que se muestra: el pedido **NO se borra** de la base de datos,
-  sigue guardado.
-- En el **historial del usuario** el pedido entregado **sí se sigue viendo**,
-  pero marcado como completado: con un **fondo verde**, la barra de progreso
-  llena y un mensaje **"✅ ¡Tu pedido llegó! 🎉"**.
-- Todo en **tiempo real**: en cuanto el admin lo marca "entregado", se quita solo
-  de su lista y al usuario le aparece como entregado al instante (Socket.io).
-
-**Botón "⏭ Avanzar a la siguiente etapa" (admin):** además de los botones de
-siempre, el admin tiene un botón que pasa el pedido a la etapa que sigue de forma
-automática (de *pendiente* a *preparando*, de *preparando* a *en camino*, etc.).
-Cuando el pedido llega a **entregado**, el botón se **deshabilita**.
+Cuando un pedido se marca **"entregado"**: desaparece del panel del admin (solo
+se filtra lo que se muestra, **no se borra** de la base) y en el historial del
+usuario se ve con **fondo verde** y el mensaje **"✅ ¡Tu pedido llegó! 🎉"**.
 
 ---
 
-## 📱 Abrir el USUARIO desde el celular
-
-1. La compu y el celular deben estar en el **mismo wifi**.
-2. En la compu busca tu IP local: abre una terminal y escribe `ipconfig`
-   (en Windows). Busca algo como `192.168.1.70`.
-3. Abre el archivo `frontend/src/api.js` y cambia la línea por tu IP:
-   ```js
-   export const URL_BACKEND = "http://192.168.1.70:3000";
-   ```
-4. En el celular, en el navegador, abre:
-   `http://192.168.1.70:5173/usuario`
-   (usa TU IP).
-
----
-
-## ✨ ¿Cómo se ve la "magia" del tiempo real?
-1. En la laptop deja abierto `/admin`.
-2. En el celular haz un pedido.
-3. ¡El pedido aparece SOLITO en la pantalla del admin! (gracias a Socket.io)
-4. El admin cambia el estado (ej. "en camino") y el usuario lo vería al instante.
+## 🎨 Diseño
+La app usa un look **elegante y formal**: paleta sobria con un color de acento
+definido en variables CSS (`:root` en `frontend/src/styles.css`), tipografía
+**Inter / Poppins** (Google Fonts), tarjetas con sombra suave, botones con
+estados claros y todo **responsive** (se ve bien en celular).
 
 ---
 
 ## 🗂️ Las 3 colecciones de MongoDB
-- **usuarios:** `{ nombre, correo, contraseña, saldo, esAdmin }`
-- **restaurantes:** `{ nombre, imagen, menu: [ { nombre, precio } ] }`
-  (el menú va DENTRO del restaurante = embebido)
-- **pedidos:** `{ usuarioId, usuario, restaurante, productos, total, estado, fecha }`
-  (guardamos `usuarioId` para saber de QUIÉN es cada pedido)
+- **usuarios:** `{ nombre, correo, contraseña, saldo, esAdmin, favoritos }`
+  (`favoritos` = arreglo de ids de restaurantes favoritos)
+- **restaurantes:** `{ nombre, imagen, categoria, menu: [ { nombre, precio } ] }`
+  (el menú va DENTRO del restaurante = embebido; `categoria` para los filtros)
+- **pedidos:** `{ usuarioId, usuario, restaurante, productos, total, estado, fecha, calificacion }`
+  (`calificacion` es opcional: el número de estrellas 1–5 cuando el usuario lo califica)
+
+> 📌 Campos NUEVOS agregados: `categoria` (restaurantes), `favoritos` (usuarios) y
+> `calificacion` (pedidos). Para que los restaurantes de ejemplo tengan su
+> categoría, corre **`npm run seed`** de nuevo (recuerda: eso **borra y rellena**
+> las colecciones usuarios, restaurantes y pedidos).

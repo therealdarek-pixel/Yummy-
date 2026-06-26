@@ -46,7 +46,7 @@ export default function Login() {
 
   return (
     <div className="inicio">
-      <h1>🍔 DiDi Food</h1>
+      <h1>🍔 Yummy</h1>
       <p>Inicia sesión para continuar</p>
 
       <form className="formulario" onSubmit={entrar}>
@@ -67,7 +67,7 @@ export default function Login() {
         <button className="boton" type="submit">Entrar</button>
       </form>
 
-      <p style={{ marginTop: "16px" }}>
+      <p className="pie">
         ¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link>
       </p>
     </div>

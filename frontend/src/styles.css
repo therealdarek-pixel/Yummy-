@@ -1,88 +1,397 @@
 /* ============================================================
-   ESTILOS SIMPLES
-   Colores suaves y todo centrado para que se vea ordenado.
+   ESTILOS DE YUMMY
+   Diseño elegante y formal, pensado para presentar a una
+   profesora. TODA la paleta vive en variables CSS (:root) para
+   reutilizarla y poder cambiar el look desde un solo lugar.
    ============================================================ */
+
+:root {
+  /* Colores base (neutros) */
+  --bg: #f4f5f7;          /* fondo gris muy suave */
+  --surface: #ffffff;     /* tarjetas y barras */
+  --texto: #1b1f27;       /* texto principal (casi negro) */
+  --texto-suave: #6b7280; /* texto secundario (gris) */
+  --borde: #e7e9ee;       /* bordes finos */
+
+  /* Color de ACENTO principal (verde sobrio y elegante) */
+  --acento: #1f6f54;
+  --acento-oscuro: #185c45;
+  --acento-suave: #eaf3ef;
+
+  /* Otros colores */
+  --estrella: #e0a32e;    /* dorado para las estrellas */
+  --exito: #1f8a5b;
+  --exito-suave: #e9f7f0;
+
+  /* Sombras y bordes redondeados */
+  --sombra-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --sombra: 0 6px 20px rgba(16, 24, 40, 0.08);
+  --radio: 14px;
+  --radio-sm: 10px;
+}
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  background: #f4f1ec;
-  color: #333;
+  background: var(--bg);
+  color: var(--texto);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Pantalla de inicio */
+/* Los títulos usan una fuente con más personalidad (Poppins). */
+h1,
+h2,
+h3 {
+  font-family: "Poppins", "Inter", sans-serif;
+  line-height: 1.25;
+  color: var(--texto);
+}
+
+/* ============================================================
+   LOGIN / REGISTRO (pantalla de inicio centrada, tipo app real)
+   ============================================================ */
 .inicio {
   max-width: 400px;
-  margin: 80px auto;
-  text-align: center;
-  padding: 20px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
 }
 
 .inicio h1 {
-  font-size: 40px;
-  margin-bottom: 10px;
+  font-size: 34px;
+  text-align: center;
+  margin-bottom: 6px;
+  color: var(--acento);
+  letter-spacing: -0.5px;
 }
 
-.inicio p {
-  margin-bottom: 20px;
-  color: #777;
+.inicio > p {
+  text-align: center;
+  margin-bottom: 22px;
+  color: var(--texto-suave);
 }
 
-/* Páginas (usuario, restaurante, admin) */
+/* Tarjeta blanca del formulario */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface);
+  padding: 26px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+}
+
+.formulario input {
+  padding: 13px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  font-size: 15px;
+  background: #fcfcfd;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Cuando escribes en un campo, se resalta con el color de acento. */
+.formulario input:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+.inicio .pie {
+  text-align: center;
+  margin-top: 18px;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.inicio a {
+  color: var(--acento);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ============================================================
+   PÁGINAS (usuario, restaurante, admin)
+   ============================================================ */
 .pagina {
-  max-width: 500px;
+  max-width: 560px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 18px 16px 40px;
 }
 
-/* Barra de arriba */
+.seccion-titulo {
+  margin: 4px 0 14px;
+  font-size: 18px;
+}
+
+/* ============================================================
+   BARRA DE NAVEGACIÓN SUPERIOR
+   Blanca, elegante y CONSISTENTE en todas las pantallas.
+   Lleva el logo "Yummy", el saludo/saldo y los botones.
+   ============================================================ */
 .barra {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: #ff6b35;
-  color: white;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 14px 18px;
+  border-radius: var(--radio);
+  margin-bottom: 20px;
 }
 
+/* Logo / nombre de la marca */
+.barra-marca {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--acento);
+  letter-spacing: -0.3px;
+}
+
+/* Lado izquierdo: saludo + saldo */
+.barra-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--texto);
+}
+
+.panel-titulo {
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+/* La "píldora" del saldo (y el nombre del admin) */
 .saldo {
-  background: white;
-  color: #ff6b35;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: bold;
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
 }
 
-/* Lista de tarjetas */
+/* Lado derecho: navegación (se empuja a la derecha con margin-left auto) */
+.barra-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* ============================================================
+   BOTONES (estados claros: normal, hover, presionado)
+   ============================================================ */
+button,
+.boton {
+  background: var(--acento);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radio-sm);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+}
+
+button:hover,
+.boton:hover {
+  background: var(--acento-oscuro);
+}
+
+button:active,
+.boton:active {
+  transform: scale(0.97);
+}
+
+/* Botones "fantasma" dentro de la barra blanca (más sobrios) */
+.barra-links .boton,
+.barra-links button {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--borde);
+  padding: 8px 13px;
+}
+
+.barra-links .boton:hover,
+.barra-links button:hover {
+  background: var(--acento-suave);
+  border-color: var(--acento-suave);
+}
+
+/* Botón grande de la pantalla de inicio (Entrar / Crear cuenta) */
+.inicio .boton {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* ============================================================
+   BUSCADOR Y CHIPS DE CATEGORÍAS
+   ============================================================ */
+.buscador {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  font-size: 15px;
+  background: var(--surface);
+  margin-bottom: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.buscador:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+/* Cada chip es un botón redondeado para filtrar por categoría. */
+.chip {
+  background: var(--surface);
+  color: var(--texto-suave);
+  border: 1px solid var(--borde);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  background: var(--acento-suave);
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+/* Chip seleccionado: se pinta con el color de acento. */
+.chip.activo {
+  background: var(--acento);
+  color: #fff;
+  border-color: var(--acento);
+}
+
+.chip.activo:hover {
+  background: var(--acento-oscuro);
+  color: #fff;
+}
+
+/* ============================================================
+   LISTA Y TARJETAS
+   ============================================================ */
 .lista {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Tarjeta de un restaurante */
+/* Tarjeta de un restaurante: un enlace grande + el corazón de favorito. */
 .tarjeta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: white;
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sm);
+  overflow: hidden;
+}
+
+.tarjeta-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   padding: 16px;
-  border-radius: 12px;
   text-decoration: none;
-  color: #333;
-  font-size: 18px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: var(--texto);
+  flex: 1;
+  min-width: 0;
 }
 
 .tarjeta .emoji {
   font-size: 30px;
+  flex-shrink: 0;
+}
+
+.tarjeta-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tarjeta-nombre {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.tarjeta-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Etiqueta de categoría (ej. "Mexicana") */
+.categoria-tag {
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* Promedio de estrellas del restaurante */
+.promedio {
+  font-size: 13px;
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
+/* Corazón de favorito (a la derecha de la tarjeta) */
+.corazon {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  padding: 16px;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform 0.12s ease;
+}
+
+.corazon:hover {
+  background: transparent;
+  transform: scale(1.2);
 }
 
 /* Tarjeta de un producto del menú */
@@ -90,49 +399,89 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: white;
-  padding: 14px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  padding: 14px 16px;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sm);
+}
+
+.tarjeta-menu span:first-child {
+  font-weight: 500;
+}
+
+/* Las tarjetas se "levantan" un poquito al pasar el cursor. */
+.tarjeta,
+.tarjeta-menu,
+.tarjeta-pedido {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tarjeta:hover,
+.tarjeta-menu:hover {
+  box-shadow: var(--sombra);
+  transform: translateY(-1px);
 }
 
 /* Carrito */
 .carrito {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  margin-top: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  padding: 18px;
+  border-radius: var(--radio);
+  margin-top: 22px;
+  box-shadow: var(--sombra);
 }
 
 .carrito h3 {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .total {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 18px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
-/* Tarjeta de un pedido (admin) */
+/* Sub-encabezado de pantallas internas (regresar + título) */
+.sub-barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sub-barra h2 {
+  font-size: 20px;
+}
+
+/* Barra de acciones del usuario (recargar saldo, etc.) */
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+/* ============================================================
+   TARJETA DE PEDIDO (historial del usuario y panel del admin)
+   ============================================================ */
 .tarjeta-pedido {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  padding: 18px;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-sm);
 }
 
 .tarjeta-pedido .producto {
-  color: #555;
-  margin-left: 6px;
+  color: var(--texto-suave);
+  margin-left: 4px;
+  font-size: 14px;
 }
 
-.estado {
-  color: #1f9d6f;
-  text-transform: capitalize;
-}
-
+/* Botones para cambiar el estado (admin): estilo sobrio. */
 .botones {
   display: flex;
   gap: 8px;
@@ -140,271 +489,204 @@ body {
   flex-wrap: wrap;
 }
 
-/* Botones en general */
-button,
-.boton {
-  background: #ff6b35;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 15px;
+.botones button {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--borde);
+}
+
+.botones button:hover {
+  background: var(--acento-suave);
+}
+
+/* Pedido entregado: se resalta con verde sobrio. */
+.tarjeta-pedido.entregado {
+  background: var(--exito-suave);
+  border-color: var(--exito);
+}
+
+.mensaje-entregado {
+  margin-top: 10px;
+  text-align: center;
   font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  transition: background 0.15s ease, transform 0.05s ease; /* animación suave */
+  color: var(--exito);
 }
 
-/* Al pasar el cursor: se oscurece un poco. */
-button:hover,
-.boton:hover {
-  background: #e85a28;
-}
-
-/* Al presionar: se "hunde" un poquito para dar sensación de clic. */
-button:active,
-.boton:active {
-  transform: scale(0.97);
-}
-
-/* Botones grandes de la pantalla de inicio */
-.inicio .boton {
+/* Botón "Avanzar etapa" (admin): ocupa todo el ancho. */
+.avanzar {
   display: block;
-  margin: 12px auto;
-  width: 80%;
-  padding: 16px;
-  font-size: 18px;
+  width: 100%;
+  margin: 14px 0 4px;
 }
 
-/* Formulario de login y registro */
-.formulario {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+.avanzar:disabled {
+  background: #cbd2d9;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.formulario input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 15px;
+/* Botón "Repetir pedido" (historial): estilo de contorno. */
+.repetir {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento);
 }
 
-/* Barra de acciones del usuario (recargar, historial, salir) */
-.acciones {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-/* Barra de navegación: lado izquierdo (nombre + saldo) */
-.barra-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* Barra de navegación: lado derecho (botones para moverse) */
-.barra-links {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* Botones y enlaces DENTRO de la barra naranja: se ven en blanco */
-.barra-links .boton,
-.barra-links button {
-  background: white;
-  color: #ff6b35;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.barra-links .boton:hover,
-.barra-links button:hover {
-  background: #ffe9e0;
-}
-
-/* Sub-encabezado de pantallas internas (botón regresar + título) */
-.sub-barra {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+.repetir:hover {
+  background: var(--acento-suave);
 }
 
 /* ============================================================
-   BARRA DE SEGUIMIENTO DEL PEDIDO (progreso por etapas)
+   CALIFICACIÓN CON ESTRELLAS
    ============================================================ */
-
-/* Contenedor: es "relative" para poder poner la línea por detrás. */
-.seguimiento {
-  position: relative;
-  margin: 16px 0 8px;
+.bloque-calificacion {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
 }
 
-/* Línea gris de fondo. Va de un punto a otro (por eso 28px a los lados). */
+.bloque-calificacion > span {
+  display: block;
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-bottom: 6px;
+}
+
+.estrellas {
+  display: inline-flex;
+  gap: 4px;
+}
+
+/* Cada estrella es un botón. Apagada = gris; encendida = dorada. */
+.estrella {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 26px;
+  line-height: 1;
+  color: #d4d8df;
+  cursor: pointer;
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.estrella:hover {
+  background: transparent;
+  transform: scale(1.15);
+}
+
+.estrella.activa {
+  color: var(--estrella);
+}
+
+.estrella:disabled {
+  cursor: default;
+}
+
+/* ============================================================
+   SEGUIMIENTO DEL PEDIDO (progreso por etapas, look pulido)
+   ============================================================ */
+.seguimiento {
+  position: relative;
+  margin: 18px 0 8px;
+}
+
+/* Línea gris de fondo (de un punto al otro). */
 .linea-fondo {
   position: absolute;
-  top: 12px;       /* a la altura del centro de los puntos */
+  top: 13px;
   left: 28px;
   right: 28px;
   height: 4px;
-  background: #ddd;
+  background: var(--borde);
   border-radius: 2px;
 }
 
-/* Línea VERDE que se "llena" según el avance (representa lo ya completado). */
+/* Línea de color que se "llena" según el avance. */
 .linea-avance {
   height: 100%;
-  background: #1f9d6f;
+  background: var(--acento);
   border-radius: 2px;
-  transition: width 0.3s ease; /* avanza suavecito cuando cambia el estado */
+  transition: width 0.35s ease;
 }
 
-/* Fila con las 4 etapas, repartidas a lo ancho. */
 .etapas {
   display: flex;
   justify-content: space-between;
-  position: relative; /* para quedar ENCIMA de la línea */
+  position: relative;
 }
 
-/* Cada etapa: el punto arriba y su nombre debajo, centrados. */
 .etapa {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 56px;
+  width: 60px;
   text-align: center;
 }
 
-/* El círculo de cada etapa. Apagado (gris) por defecto. */
+/* El círculo de cada etapa (gris por defecto). */
 .punto {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ddd;
-  color: white;
+  background: var(--borde);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* Punto COMPLETADO: ya pasó por esa etapa (verde, con ✓). */
 .punto.completada {
-  background: #1f9d6f;
+  background: var(--acento);
 }
 
-/* Punto ACTUAL: la etapa en la que va ahora (naranja y un poco más grande). */
 .punto.actual {
-  background: #ff6b35;
+  background: var(--acento);
   transform: scale(1.15);
-  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); /* aro suave para resaltar */
+  box-shadow: 0 0 0 4px var(--acento-suave);
 }
 
-/* Nombre de la etapa (gris por defecto = etapa que falta). */
 .etapa-nombre {
   font-size: 12px;
-  color: #999;
+  color: var(--texto-suave);
   text-transform: capitalize;
 }
 
-/* Nombre de etapa completada: en verde. */
 .etapa-nombre.completada {
-  color: #1f9d6f;
+  color: var(--acento);
 }
 
-/* Nombre de la etapa actual: naranja y en negritas. */
 .etapa-nombre.actual {
-  color: #ff6b35;
-  font-weight: bold;
-}
-
-/* Botón "Avanzar etapa": ocupa todo el ancho para que se vea claro. */
-.avanzar {
-  display: block;
-  width: 100%;
-  margin: 12px 0 4px;
-}
-
-/* Cuando ya está "entregado", el botón se ve apagado y no se puede picar. */
-.avanzar:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* ============================================================
-   MEJORAS DE APARIENCIA (look tipo app real)
-   ============================================================ */
-
-/* Las tarjetas se "levantan" un poco al pasar el cursor. */
-.tarjeta,
-.tarjeta-menu,
-.tarjeta-pedido {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.tarjeta:hover,
-.tarjeta-menu:hover,
-.tarjeta-pedido:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
-}
-
-/* Jerarquía de textos: títulos más marcados, texto normal cómodo de leer. */
-h1, h2, h3 {
-  line-height: 1.25;
-}
-
-body {
-  line-height: 1.5;
-}
-
-/* ============================================================
-   PEDIDO ENTREGADO (en el historial del usuario)
-   Se ve distinto: borde y fondo verde suave para que destaque.
-   ============================================================ */
-.tarjeta-pedido.entregado {
-  background: #eafaf3;              /* verde muy clarito */
-  border: 2px solid #1f9d6f;       /* borde verde de acento */
-}
-
-/* Mensaje celebratorio "¡Tu pedido llegó!" */
-.mensaje-entregado {
-  margin-top: 10px;
-  text-align: center;
-  font-weight: bold;
-  color: #1f9d6f;
-  font-size: 16px;
+  color: var(--acento);
+  font-weight: 700;
 }
 
 /* ============================================================
    RESPONSIVE (que se vea bien en el celular)
-   En pantallas chicas, la barra de arriba se acomoda en columna
-   y los botones de la barra se reparten sin encimarse.
    ============================================================ */
-@media (max-width: 520px) {
-  /* La barra naranja se apila: info arriba, botones abajo. */
+@media (max-width: 540px) {
+  /* La barra de arriba se apila en columna. */
   .barra {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 12px;
   }
 
-  /* Los botones de navegación se reparten a lo ancho. */
+  .barra-marca {
+    text-align: center;
+  }
+
+  .barra-info {
+    justify-content: center;
+  }
+
+  /* Los botones de navegación se centran y dejan de empujarse a la derecha. */
   .barra-links {
+    margin-left: 0;
     justify-content: center;
   }
 

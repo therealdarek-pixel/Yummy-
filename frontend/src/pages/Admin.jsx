@@ -75,11 +75,14 @@ export default function Admin() {
   return (
     <div className="pagina">
       <header className="barra">
+        <div className="barra-marca">🍔 Yummy</div>
         <div className="barra-info">
-          <h2>💻 Panel de Admin</h2>
+          <span className="panel-titulo">💻 Panel de Admin</span>
           <span className="saldo">{admin.nombre}</span>
         </div>
-        <button onClick={salir}>🚪 Cerrar sesión</button>
+        <nav className="barra-links">
+          <button onClick={salir}>Cerrar sesión</button>
+        </nav>
       </header>
 
       <div className="lista">

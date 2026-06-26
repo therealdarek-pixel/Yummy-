@@ -1,4 +1,4 @@
-# 🚀 Cómo subir DiDi Food a internet (deploy)
+# 🚀 Cómo subir Yummy a internet (deploy)
 
 Esta guía explica cómo poner el proyecto en línea de forma sencilla:
 

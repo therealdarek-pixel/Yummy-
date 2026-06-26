@@ -46,7 +46,7 @@ export default function Registro() {
 
   return (
     <div className="inicio">
-      <h1>🍔 DiDi Food</h1>
+      <h1>🍔 Yummy</h1>
       <p>Crea tu cuenta</p>
 
       <form className="formulario" onSubmit={registrar}>
@@ -74,7 +74,7 @@ export default function Registro() {
         <button className="boton" type="submit">Crear cuenta</button>
       </form>
 
-      <p style={{ marginTop: "16px" }}>
+      <p className="pie">
         ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
       </p>
     </div>
