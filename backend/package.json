@@ -1,0 +1,16 @@
+{
+  "name": "didi-food-backend",
+  "version": "1.0.0",
+  "description": "Backend de un DiDi Food simple con Node, Express, MongoDB y Socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0",
+    "socket.io": "^4.7.5"
+  }
+}

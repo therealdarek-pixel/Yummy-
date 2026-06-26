@@ -1,0 +1,21 @@
+# Dependencias (se reinstalan solas con npm install)
+node_modules/
+**/node_modules/
+
+# Variables de entorno locales (NO subir secretos)
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Build del frontend
+dist/
+**/dist/
+
+# Logs y basura del sistema
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

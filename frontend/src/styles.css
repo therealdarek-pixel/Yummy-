@@ -1,0 +1,419 @@
+/* ============================================================
+   ESTILOS SIMPLES
+   Colores suaves y todo centrado para que se vea ordenado.
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  background: #f4f1ec;
+  color: #333;
+}
+
+/* Pantalla de inicio */
+.inicio {
+  max-width: 400px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 20px;
+}
+
+.inicio h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.inicio p {
+  margin-bottom: 20px;
+  color: #777;
+}
+
+/* Páginas (usuario, restaurante, admin) */
+.pagina {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Barra de arriba */
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ff6b35;
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.saldo {
+  background: white;
+  color: #ff6b35;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* Lista de tarjetas */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tarjeta de un restaurante */
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tarjeta .emoji {
+  font-size: 30px;
+}
+
+/* Tarjeta de un producto del menú */
+.tarjeta-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Carrito */
+.carrito {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.carrito h3 {
+  margin-bottom: 10px;
+}
+
+.total {
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+/* Tarjeta de un pedido (admin) */
+.tarjeta-pedido {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tarjeta-pedido .producto {
+  color: #555;
+  margin-left: 6px;
+}
+
+.estado {
+  color: #1f9d6f;
+  text-transform: capitalize;
+}
+
+.botones {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* Botones en general */
+button,
+.boton {
+  background: #ff6b35;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s ease, transform 0.05s ease; /* animación suave */
+}
+
+/* Al pasar el cursor: se oscurece un poco. */
+button:hover,
+.boton:hover {
+  background: #e85a28;
+}
+
+/* Al presionar: se "hunde" un poquito para dar sensación de clic. */
+button:active,
+.boton:active {
+  transform: scale(0.97);
+}
+
+/* Botones grandes de la pantalla de inicio */
+.inicio .boton {
+  display: block;
+  margin: 12px auto;
+  width: 80%;
+  padding: 16px;
+  font-size: 18px;
+}
+
+/* Formulario de login y registro */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.formulario input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+/* Barra de acciones del usuario (recargar, historial, salir) */
+.acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+/* Barra de navegación: lado izquierdo (nombre + saldo) */
+.barra-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Barra de navegación: lado derecho (botones para moverse) */
+.barra-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Botones y enlaces DENTRO de la barra naranja: se ven en blanco */
+.barra-links .boton,
+.barra-links button {
+  background: white;
+  color: #ff6b35;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.barra-links .boton:hover,
+.barra-links button:hover {
+  background: #ffe9e0;
+}
+
+/* Sub-encabezado de pantallas internas (botón regresar + título) */
+.sub-barra {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ============================================================
+   BARRA DE SEGUIMIENTO DEL PEDIDO (progreso por etapas)
+   ============================================================ */
+
+/* Contenedor: es "relative" para poder poner la línea por detrás. */
+.seguimiento {
+  position: relative;
+  margin: 16px 0 8px;
+}
+
+/* Línea gris de fondo. Va de un punto a otro (por eso 28px a los lados). */
+.linea-fondo {
+  position: absolute;
+  top: 12px;       /* a la altura del centro de los puntos */
+  left: 28px;
+  right: 28px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+}
+
+/* Línea VERDE que se "llena" según el avance (representa lo ya completado). */
+.linea-avance {
+  height: 100%;
+  background: #1f9d6f;
+  border-radius: 2px;
+  transition: width 0.3s ease; /* avanza suavecito cuando cambia el estado */
+}
+
+/* Fila con las 4 etapas, repartidas a lo ancho. */
+.etapas {
+  display: flex;
+  justify-content: space-between;
+  position: relative; /* para quedar ENCIMA de la línea */
+}
+
+/* Cada etapa: el punto arriba y su nombre debajo, centrados. */
+.etapa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 56px;
+  text-align: center;
+}
+
+/* El círculo de cada etapa. Apagado (gris) por defecto. */
+.punto {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ddd;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Punto COMPLETADO: ya pasó por esa etapa (verde, con ✓). */
+.punto.completada {
+  background: #1f9d6f;
+}
+
+/* Punto ACTUAL: la etapa en la que va ahora (naranja y un poco más grande). */
+.punto.actual {
+  background: #ff6b35;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2); /* aro suave para resaltar */
+}
+
+/* Nombre de la etapa (gris por defecto = etapa que falta). */
+.etapa-nombre {
+  font-size: 12px;
+  color: #999;
+  text-transform: capitalize;
+}
+
+/* Nombre de etapa completada: en verde. */
+.etapa-nombre.completada {
+  color: #1f9d6f;
+}
+
+/* Nombre de la etapa actual: naranja y en negritas. */
+.etapa-nombre.actual {
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+/* Botón "Avanzar etapa": ocupa todo el ancho para que se vea claro. */
+.avanzar {
+  display: block;
+  width: 100%;
+  margin: 12px 0 4px;
+}
+
+/* Cuando ya está "entregado", el botón se ve apagado y no se puede picar. */
+.avanzar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   MEJORAS DE APARIENCIA (look tipo app real)
+   ============================================================ */
+
+/* Las tarjetas se "levantan" un poco al pasar el cursor. */
+.tarjeta,
+.tarjeta-menu,
+.tarjeta-pedido {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta:hover,
+.tarjeta-menu:hover,
+.tarjeta-pedido:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Jerarquía de textos: títulos más marcados, texto normal cómodo de leer. */
+h1, h2, h3 {
+  line-height: 1.25;
+}
+
+body {
+  line-height: 1.5;
+}
+
+/* ============================================================
+   PEDIDO ENTREGADO (en el historial del usuario)
+   Se ve distinto: borde y fondo verde suave para que destaque.
+   ============================================================ */
+.tarjeta-pedido.entregado {
+  background: #eafaf3;              /* verde muy clarito */
+  border: 2px solid #1f9d6f;       /* borde verde de acento */
+}
+
+/* Mensaje celebratorio "¡Tu pedido llegó!" */
+.mensaje-entregado {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+  color: #1f9d6f;
+  font-size: 16px;
+}
+
+/* ============================================================
+   RESPONSIVE (que se vea bien en el celular)
+   En pantallas chicas, la barra de arriba se acomoda en columna
+   y los botones de la barra se reparten sin encimarse.
+   ============================================================ */
+@media (max-width: 520px) {
+  /* La barra naranja se apila: info arriba, botones abajo. */
+  .barra {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  /* Los botones de navegación se reparten a lo ancho. */
+  .barra-links {
+    justify-content: center;
+  }
+
+  /* Las etapas un poco más angostas para que quepan las 4. */
+  .etapa {
+    width: 48px;
+  }
+
+  .etapa-nombre {
+    font-size: 11px;
+  }
+}

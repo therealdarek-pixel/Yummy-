@@ -1,0 +1,6 @@
+node_modules
+dist
+
+# Archivos de variables locales (no se suben a GitHub)
+.env.local
+.env.*.local
