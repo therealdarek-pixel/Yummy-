@@ -160,11 +160,24 @@ app.get("/restaurantes/promedios", async (req, res) => {
 });
 
 // Devuelve UN restaurante por su id (con su menú adentro).
+// A cada producto del menú que coincida por nombre con el catálogo le
+// agregamos su "stock" actual (solo en la respuesta, no se guarda en la base).
 app.get("/restaurantes/:id", async (req, res) => {
   const bd = await conectar();
   const id = new ObjectId(req.params.id);
 
   const restaurante = await bd.collection("restaurantes").findOne({ _id: id });
+
+  // Cruzamos cada producto del menú con la colección "productos" por nombre.
+  for (const producto of restaurante.menu) {
+    const delCatalogo = await bd
+      .collection("productos")
+      .findOne({ nombre: producto.nombre });
+
+    if (delCatalogo) {
+      producto.stock = delCatalogo.stock;
+    }
+  }
 
   res.json(restaurante);
 });
@@ -408,11 +421,27 @@ function inicioDeSemana(fecha) {
 }
 
 // Totales de ventas agrupados por día.
+// Si llega ?fecha=AAAA-MM-DD, devuelve solo las ventas de ESE día.
 app.get("/reportes/ventas-diarias", async (req, res) => {
   const bd = await conectar();
+  const fecha = req.query.fecha;
   const ventas = await bd.collection("ventas").find().toArray();
 
-  // Sumamos el total de cada día en un objeto { "AAAA-MM-DD": total }.
+  // Caso 1: pidieron un día específico -> total y lista de ese día.
+  if (fecha) {
+    const ventasDelDia = ventas.filter(
+      (venta) => new Date(venta.fecha).toISOString().slice(0, 10) === fecha
+    );
+
+    let total = 0;
+    ventasDelDia.forEach((venta) => {
+      total += venta.total;
+    });
+
+    return res.json({ dia: fecha, total: total, ventas: ventasDelDia });
+  }
+
+  // Caso 2 (por defecto): sumamos el total de cada día en un objeto { "AAAA-MM-DD": total }.
   const porDia = {};
   ventas.forEach((venta) => {
     const dia = new Date(venta.fecha).toISOString().slice(0, 10);

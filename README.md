@@ -114,6 +114,16 @@ En el historial, cada pedido tiene un botón **"Repetir pedido"** que vuelve a
 crear el mismo pedido (mismos productos y total) si te alcanza el saldo. Reusa
 la misma lógica de crear pedido.
 
+### 📦 Stock disponible en el menú
+En el menú de cada restaurante, los productos que coinciden con el catálogo
+(colección `productos`) muestran su **stock actual** junto al nombre y precio
+(ej. **"Quedan 8 disponibles"**). Si un producto está **agotado** (stock 0 o
+menos), se marca como **"Agotado"** y su botón **"Agregar" se deshabilita**. El
+backend agrega ese `stock` al vuelo en `GET /restaurantes/:id` cruzando por nombre
+con `productos` (no guarda nada nuevo). Los productos del menú que no están en el
+catálogo simplemente no muestran dato de stock. El stock se lee cada vez que se
+abre el menú (no requiere tiempo real).
+
 ### 💰 Saldo e historial
 - **Recargar saldo:** botón "➕ Recargar $100" (se refleja al instante, también
   en la barra de arriba).
@@ -142,6 +152,15 @@ en UN SOLO lugar: `frontend/src/etapas.js`.
 Cuando un pedido se marca **"entregado"**: desaparece del panel del admin (solo
 se filtra lo que se muestra, **no se borra** de la base) y en el historial del
 usuario se ve con **fondo verde** y el mensaje **"✅ ¡Tu pedido llegó! 🎉"**.
+
+### 📊 Reportes (con calendario)
+En la pestaña **Reportes** del panel de gerente se ven las **ventas por día**, las
+**ventas por semana** y el **producto estrella** (el más vendido). Además hay un
+**calendario** (librería `react-day-picker`) para **consultar un día específico**:
+al elegir una fecha, el frontend pide el reporte de ESE día a
+`GET /reportes/ventas-diarias?fecha=AAAA-MM-DD` y muestra el total y la lista de
+ventas de ese día (o **"No hay ventas registradas este día"** si no hubo). El
+calendario usa el verde de acento de Yummy para que combine con el resto del panel.
 
 ---
 

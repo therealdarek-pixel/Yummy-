@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from "react";
 import { Package, Plus, Save, Trash2, AlertTriangle } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON, enviarJSON } from "../api";
 
 // A partir de esta cantidad o menos, el stock se considera bajo.
 const STOCK_BAJO = 5;
@@ -19,9 +19,7 @@ export default function GerenteProductos() {
 
   // Trae el catálogo desde el backend.
   function cargarProductos() {
-    fetch(`${URL_BACKEND}/productos`)
-      .then((r) => r.json())
-      .then((datos) => setProductos(datos));
+    obtenerJSON("/productos").then((datos) => setProductos(datos));
   }
 
   useEffect(() => {
@@ -31,15 +29,11 @@ export default function GerenteProductos() {
   // Crea un producto nuevo con los datos del formulario.
   async function crear(evento) {
     evento.preventDefault();
-    await fetch(`${URL_BACKEND}/productos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: nuevo.nombre,
-        precio: Number(nuevo.precio),
-        stock: Number(nuevo.stock),
-        categoria: nuevo.categoria,
-      }),
+    await enviarJSON("/productos", "POST", {
+      nombre: nuevo.nombre,
+      precio: Number(nuevo.precio),
+      stock: Number(nuevo.stock),
+      categoria: nuevo.categoria,
     });
     setNuevo({ nombre: "", precio: "", stock: "", categoria: "" });
     cargarProductos();
@@ -54,22 +48,18 @@ export default function GerenteProductos() {
 
   // Guarda los cambios de un producto editado.
   async function guardar(producto) {
-    await fetch(`${URL_BACKEND}/productos/${producto._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: producto.nombre,
-        precio: Number(producto.precio),
-        stock: Number(producto.stock),
-        categoria: producto.categoria,
-      }),
+    await enviarJSON(`/productos/${producto._id}`, "PUT", {
+      nombre: producto.nombre,
+      precio: Number(producto.precio),
+      stock: Number(producto.stock),
+      categoria: producto.categoria,
     });
     cargarProductos();
   }
 
   // Elimina un producto del catálogo.
   async function eliminar(id) {
-    await fetch(`${URL_BACKEND}/productos/${id}`, { method: "DELETE" });
+    await enviarJSON(`/productos/${id}`, "DELETE");
     cargarProductos();
   }
 

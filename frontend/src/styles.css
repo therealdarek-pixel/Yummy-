@@ -53,3 +53,13 @@
 .marcador-pedido {
   transition: transform 1s ease;
 }
+
+/* Calendario de Reportes (react-day-picker) con los colores de Yummy. */
+.calendario-yummy {
+  --rdp-accent-color: #1f6f54; /* verde de acento (día elegido) */
+  --rdp-accent-background-color: #eaf3ef; /* verde suave (hover) */
+  --rdp-today-color: #1f6f54;
+  --rdp-font-family: "Inter", system-ui, sans-serif;
+  margin: 0;
+  font-size: 0.9rem;
+}

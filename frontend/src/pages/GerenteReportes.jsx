@@ -5,26 +5,50 @@
 // ============================================================
 
 import { useState, useEffect } from "react";
-import { BarChart3, CalendarDays, Trophy } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { DayPicker } from "react-day-picker";
+import { es } from "react-day-picker/locale";
+import "react-day-picker/style.css";
+import { BarChart3, CalendarDays, Trophy, CalendarSearch } from "lucide-react";
+import { obtenerJSON } from "../api";
+
+// Pasa una fecha del calendario a texto AAAA-MM-DD (para mandarla al backend).
+function aTexto(fecha) {
+  const año = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  return `${año}-${mes}-${dia}`;
+}
 
 export default function GerenteReportes() {
   const [diarias, setDiarias] = useState([]);
   const [semanales, setSemanales] = useState([]);
   const [estrella, setEstrella] = useState(null);
 
+  // Calendario: día elegido y el reporte de ese día.
+  const [diaElegido, setDiaElegido] = useState(null);
+  const [reporteDia, setReporteDia] = useState(null);
+
+  // Cuando el gerente elige un día, pedimos el reporte de ESE día.
   useEffect(() => {
-    fetch(`${URL_BACKEND}/reportes/ventas-diarias`)
-      .then((r) => r.json())
-      .then((datos) => setDiarias(datos));
+    if (!diaElegido) {
+      setReporteDia(null);
+      return;
+    }
+    obtenerJSON(`/reportes/ventas-diarias?fecha=${aTexto(diaElegido)}`).then(
+      (datos) => setReporteDia(datos)
+    );
+  }, [diaElegido]);
 
-    fetch(`${URL_BACKEND}/reportes/ventas-semanales`)
-      .then((r) => r.json())
-      .then((datos) => setSemanales(datos));
+  useEffect(() => {
+    obtenerJSON("/reportes/ventas-diarias").then((datos) => setDiarias(datos));
 
-    fetch(`${URL_BACKEND}/reportes/producto-estrella`)
-      .then((r) => r.json())
-      .then((datos) => setEstrella(datos));
+    obtenerJSON("/reportes/ventas-semanales").then((datos) =>
+      setSemanales(datos)
+    );
+
+    obtenerJSON("/reportes/producto-estrella").then((datos) =>
+      setEstrella(datos)
+    );
   }, []);
 
   return (
@@ -46,6 +70,66 @@ export default function GerenteReportes() {
         ) : (
           <p className="text-sm text-slate-500">Aún no hay ventas registradas.</p>
         )}
+      </div>
+
+      {/* Calendario: ventas de un día específico */}
+      <div className="tarjeta p-5">
+        <h3 className="mb-3 flex items-center gap-2 font-bold text-slate-800">
+          <CalendarSearch className="h-5 w-5 text-acento" /> Consultar un día
+        </h3>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <DayPicker
+            className="calendario-yummy"
+            mode="single"
+            locale={es}
+            selected={diaElegido}
+            onSelect={setDiaElegido}
+          />
+
+          <div className="flex-1">
+            {!diaElegido && (
+              <p className="text-sm text-slate-500">
+                Elige un día en el calendario para ver sus ventas.
+              </p>
+            )}
+
+            {diaElegido && reporteDia && (
+              <>
+                <p className="mb-1 text-sm text-slate-500">
+                  Ventas del <span className="font-semibold">{reporteDia.dia}</span>
+                </p>
+                <p className="mb-3 text-2xl font-bold text-slate-800">
+                  Total: ${reporteDia.total}
+                </p>
+
+                {reporteDia.ventas.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No hay ventas registradas este día.
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {reporteDia.ventas.map((venta) => (
+                      <div
+                        key={venta._id}
+                        className="rounded-lg border border-slate-200 p-3 text-sm"
+                      >
+                        <p className="font-semibold text-slate-700">
+                          {venta.restaurante} — ${venta.total}
+                        </p>
+                        {venta.productos.map((producto, i) => (
+                          <p key={i} className="ml-1 text-slate-500">
+                            • {producto.nombre} (${producto.precio})
+                          </p>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Ventas por día */}

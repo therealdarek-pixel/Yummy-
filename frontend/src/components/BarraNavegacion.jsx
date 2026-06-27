@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UtensilsCrossed, Wallet, Store, ReceiptText, LogOut } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
 
 export default function BarraNavegacion({ saldo }) {
@@ -15,14 +15,15 @@ export default function BarraNavegacion({ saldo }) {
   // Si la pantalla NO nos pasó el saldo, lo buscamos nosotros.
   useEffect(() => {
     if (saldo === undefined && usuario) {
-      fetch(`${URL_BACKEND}/usuarios/${usuario._id}`)
-        .then((r) => r.json())
-        .then((datos) => setSaldoBuscado(datos.saldo));
+      obtenerJSON(`/usuarios/${usuario._id}`).then((datos) =>
+        setSaldoBuscado(datos.saldo)
+      );
     }
   }, []);
 
   const saldoAMostrar = saldo !== undefined ? saldo : saldoBuscado;
 
+  // Cierra la sesión y regresa al login.
   function salir() {
     cerrarSesion();
     navegar("/login");

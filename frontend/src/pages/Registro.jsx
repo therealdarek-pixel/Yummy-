@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UtensilsCrossed, UserPlus } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { enviarJSON } from "../api";
 import { guardarUsuario } from "../sesion";
 
 export default function Registro() {
@@ -21,17 +21,11 @@ export default function Registro() {
   async function registrar(evento) {
     evento.preventDefault();
 
-//se manda la información al backend para crear la cuenta del usuario
-    const respuesta = await fetch(`${URL_BACKEND}/registro`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: nombre,
-        correo: correo,
-        contraseña: contraseña,
-      }),
+    const datos = await enviarJSON("/registro", "POST", {
+      nombre: nombre,
+      correo: correo,
+      contraseña: contraseña,
     });
-    const datos = await respuesta.json();
 
     if (datos.error) {
       alert(datos.error);

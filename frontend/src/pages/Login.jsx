@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UtensilsCrossed, LogIn } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { enviarJSON } from "../api";
 import { guardarUsuario } from "../sesion";
 
 export default function Login() {
@@ -16,16 +16,11 @@ export default function Login() {
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
 
-  // Manda el correo y la contraseña al backend.
+  // Manda el correo y la contraseña al backend e inicia sesión.
   async function entrar(evento) {
     evento.preventDefault();
 
-    const respuesta = await fetch(`${URL_BACKEND}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correo: correo, contraseña: contraseña }),
-    });
-    const datos = await respuesta.json();
+    const datos = await enviarJSON("/login", "POST", { correo: correo, contraseña: contraseña });
 
     if (datos.error) {
       alert(datos.error);
@@ -34,7 +29,7 @@ export default function Login() {
 
     guardarUsuario(datos);
 
-    // Según si es admin o no, lo mandamos a un lado o a otro.
+    // Según si es gerente (esAdmin) o usuario normal, lo mandamos a un lado o a otro.
     if (datos.esAdmin) {
       navegar("/admin");
     } else {

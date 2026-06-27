@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, RotateCcw, ReceiptText } from "lucide-react";
 import { socket } from "../socket";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON, enviarJSON } from "../api";
 import { obtenerUsuario } from "../sesion";
 import BarraNavegacion from "../components/BarraNavegacion";
 import SeguimientoPedido from "../components/SeguimientoPedido";
@@ -24,37 +24,33 @@ export default function Historial() {
 
   // Trae (o vuelve a traer) los pedidos de este usuario.
   function cargarPedidos() {
-    fetch(`${URL_BACKEND}/pedidos/usuario/${usuario._id}`)
-      .then((r) => r.json())
-      .then((datos) => setPedidos(datos));
+    obtenerJSON(`/pedidos/usuario/${usuario._id}`).then((datos) =>
+      setPedidos(datos)
+    );
   }
 
   useEffect(() => {
     cargarPedidos();
 
     // Coordenadas de cada restaurante (para el origen del mapa).
-    fetch(`${URL_BACKEND}/restaurantes`)
-      .then((r) => r.json())
-      .then((lista) => {
-        const mapa = {};
-        lista.forEach((restaurante) => {
-          mapa[restaurante.nombre] = [
-            restaurante.lat ?? ORIGEN_POR_DEFECTO[0],
-            restaurante.lng ?? ORIGEN_POR_DEFECTO[1],
-          ];
-        });
-        setCoordsPorRestaurante(mapa);
+    obtenerJSON("/restaurantes").then((lista) => {
+      const mapa = {};
+      lista.forEach((restaurante) => {
+        mapa[restaurante.nombre] = [
+          restaurante.lat ?? ORIGEN_POR_DEFECTO[0],
+          restaurante.lng ?? ORIGEN_POR_DEFECTO[1],
+        ];
       });
+      setCoordsPorRestaurante(mapa);
+    });
 
     // Coordenadas de la casa del usuario (para el destino del mapa).
-    fetch(`${URL_BACKEND}/usuarios/${usuario._id}`)
-      .then((r) => r.json())
-      .then((datos) => {
-        setCasaUsuario([
-          datos.lat ?? DESTINO_POR_DEFECTO[0],
-          datos.lng ?? DESTINO_POR_DEFECTO[1],
-        ]);
-      });
+    obtenerJSON(`/usuarios/${usuario._id}`).then((datos) => {
+      setCasaUsuario([
+        datos.lat ?? DESTINO_POR_DEFECTO[0],
+        datos.lng ?? DESTINO_POR_DEFECTO[1],
+      ]);
+    });
 
     // Si el admin cambia el estado, lo actualizamos aquí (mueve el mapa también).
     socket.on("pedido-actualizado", ({ id, estado }) => {
@@ -70,10 +66,8 @@ export default function Historial() {
 
   // Guarda la calificación (estrellas) de un pedido entregado.
   async function calificar(id, estrellas) {
-    await fetch(`${URL_BACKEND}/pedidos/${id}/calificacion`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ calificacion: estrellas }),
+    await enviarJSON(`/pedidos/${id}/calificacion`, "PUT", {
+      calificacion: estrellas,
     });
     setPedidos((actuales) =>
       actuales.map((p) => (p._id === id ? { ...p, calificacion: estrellas } : p))
@@ -82,17 +76,12 @@ export default function Historial() {
 
   // Vuelve a crear el MISMO pedido (mismos productos y total).
   async function repetir(pedido) {
-    const respuesta = await fetch(`${URL_BACKEND}/pedidos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        usuarioId: usuario._id,
-        restaurante: pedido.restaurante,
-        productos: pedido.productos,
-        total: pedido.total,
-      }),
+    const datos = await enviarJSON("/pedidos", "POST", {
+      usuarioId: usuario._id,
+      restaurante: pedido.restaurante,
+      productos: pedido.productos,
+      total: pedido.total,
     });
-    const datos = await respuesta.json();
 
     if (datos.error) {
       alert(datos.error);

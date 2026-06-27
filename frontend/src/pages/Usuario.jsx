@@ -8,7 +8,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Plus, Heart, Star } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON, enviarJSON } from "../api";
 import { obtenerUsuario } from "../sesion";
 import BarraNavegacion from "../components/BarraNavegacion";
 
@@ -28,35 +28,25 @@ export default function Usuario() {
 
   useEffect(() => {
     // 1. La lista de restaurantes.
-    fetch(`${URL_BACKEND}/restaurantes`)
-      .then((r) => r.json())
-      .then((datos) => setRestaurantes(datos));
+    obtenerJSON("/restaurantes").then((datos) => setRestaurantes(datos));
 
     // 2. El usuario: su saldo y sus favoritos.
-    fetch(`${URL_BACKEND}/usuarios/${usuarioSesion._id}`)
-      .then((r) => r.json())
-      .then((datos) => {
-        setSaldo(datos.saldo);
-        setFavoritos(datos.favoritos || []);
-      });
+    obtenerJSON(`/usuarios/${usuarioSesion._id}`).then((datos) => {
+      setSaldo(datos.saldo);
+      setFavoritos(datos.favoritos || []);
+    });
 
     // 3. El promedio de estrellas de cada restaurante.
-    fetch(`${URL_BACKEND}/restaurantes/promedios`)
-      .then((r) => r.json())
-      .then((datos) => setPromedios(datos));
+    obtenerJSON("/restaurantes/promedios").then((datos) => setPromedios(datos));
   }, []);
 
   // Recarga $100 al saldo del usuario.
   async function recargar() {
-    const respuesta = await fetch(
-      `${URL_BACKEND}/usuarios/${usuarioSesion._id}/recargar`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cantidad: 100 }),
-      }
+    const datos = await enviarJSON(
+      `/usuarios/${usuarioSesion._id}/recargar`,
+      "POST",
+      { cantidad: 100 }
     );
-    const datos = await respuesta.json();
     setSaldo(datos.saldoNuevo);
   }
 
@@ -67,11 +57,10 @@ export default function Usuario() {
     evento.preventDefault();
     evento.stopPropagation();
 
-    const respuesta = await fetch(
-      `${URL_BACKEND}/usuarios/${usuarioSesion._id}/favoritos/${restauranteId}`,
-      { method: "POST" }
+    const datos = await enviarJSON(
+      `/usuarios/${usuarioSesion._id}/favoritos/${restauranteId}`,
+      "POST"
     );
-    const datos = await respuesta.json();
     setFavoritos(datos.favoritos);
   }
 

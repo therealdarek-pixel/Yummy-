@@ -6,7 +6,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, ShoppingCart, CheckCircle2 } from "lucide-react";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON, enviarJSON } from "../api";
 import { obtenerUsuario } from "../sesion";
 import BarraNavegacion from "../components/BarraNavegacion";
 
@@ -19,12 +19,12 @@ export default function Restaurante() {
   const [carrito, setCarrito] = useState([]); // productos que va agregando
   const [ticket, setTicket] = useState(null); // datos del ticket de confirmación
 
+  // Al abrir, traemos el restaurante con su menú (y el stock de cada producto).
   useEffect(() => {
-    fetch(`${URL_BACKEND}/restaurantes/${id}`)
-      .then((r) => r.json())
-      .then((datos) => setRestaurante(datos));
+    obtenerJSON(`/restaurantes/${id}`).then((datos) => setRestaurante(datos));
   }, [id]);
 
+  // Agrega un producto al carrito.
   function agregar(producto) {
     setCarrito([...carrito, producto]);
   }
@@ -32,18 +32,14 @@ export default function Restaurante() {
   // Sumamos el total de todo lo que hay en el carrito.
   const total = carrito.reduce((suma, p) => suma + p.precio, 0);
 
+  // Confirma el pedido en el backend y prepara el ticket.
   async function confirmar() {
-    const respuesta = await fetch(`${URL_BACKEND}/pedidos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        usuarioId: usuario._id,
-        restaurante: restaurante.nombre,
-        productos: carrito,
-        total: total,
-      }),
+    const datos = await enviarJSON("/pedidos", "POST", {
+      usuarioId: usuario._id,
+      restaurante: restaurante.nombre,
+      productos: carrito,
+      total: total,
     });
-    const datos = await respuesta.json();
 
     if (datos.error) {
       alert(datos.error);
@@ -80,20 +76,41 @@ export default function Restaurante() {
 
       {/* MENÚ */}
       <div className="flex flex-col gap-3">
-        {restaurante.menu.map((producto, i) => (
-          <div
-            key={i}
-            className="tarjeta flex items-center justify-between gap-3 p-4 transition hover:shadow-md"
-          >
-            <span className="font-medium text-slate-700">{producto.nombre}</span>
-            <div className="flex items-center gap-3">
-              <span className="font-semibold text-slate-800">${producto.precio}</span>
-              <button onClick={() => agregar(producto)} className="btn btn-ghost">
-                <Plus className="h-4 w-4" /> Agregar
-              </button>
+        {restaurante.menu.map((producto, i) => {
+          // El stock solo viene si el producto coincide con el catálogo.
+          const tieneStock = producto.stock !== undefined;
+          const agotado = tieneStock && producto.stock <= 0;
+          return (
+            <div
+              key={i}
+              className="tarjeta flex items-center justify-between gap-3 p-4 transition hover:shadow-md"
+            >
+              <div>
+                <span className="font-medium text-slate-700">{producto.nombre}</span>
+                {tieneStock && (
+                  <p
+                    className={
+                      "text-xs font-semibold " +
+                      (agotado ? "text-rose-500" : "text-emerald-600")
+                    }
+                  >
+                    {agotado ? "Agotado" : `Quedan ${producto.stock} disponibles`}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-slate-800">${producto.precio}</span>
+                <button
+                  onClick={() => agregar(producto)}
+                  disabled={agotado}
+                  className="btn btn-ghost"
+                >
+                  <Plus className="h-4 w-4" /> Agregar
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* CARRITO */}

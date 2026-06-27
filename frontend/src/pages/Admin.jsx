@@ -1,7 +1,8 @@
 // ============================================================
-//  PÁGINA DEL ADMIN
-//  Muestra todos los pedidos EN TIEMPO REAL y deja cambiar el
-//  estado de cada pedido.
+//  PANEL DE GERENTE
+//  Tiene 3 pestañas: Pedidos (en tiempo real), Productos y
+//  Reportes. Aquí se ven los pedidos, se cambia su estado y se
+//  recibe el aviso de stock bajo.
 // ============================================================
 
 import { useState, useEffect } from "react";
@@ -19,7 +20,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { socket } from "../socket";
-import { URL_BACKEND } from "../api";
+import { obtenerJSON, enviarJSON } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
 import SeguimientoPedido from "../components/SeguimientoPedido";
 import GerenteProductos from "./GerenteProductos";
@@ -28,11 +29,12 @@ import { ETAPAS } from "../etapas";
 
 export default function Admin() {
   const navegar = useNavigate();
-  const admin = obtenerUsuario(); // el gerente que inició sesión
+  const gerente = obtenerUsuario(); // el gerente que inició sesión
   const [pedidos, setPedidos] = useState([]);
   const [pestaña, setPestaña] = useState("pedidos"); // pestaña activa del panel
   const [alertaStock, setAlertaStock] = useState(null); // aviso de stock bajo
 
+  // Cierra la sesión y regresa al login.
   function salir() {
     cerrarSesion();
     navegar("/login");
@@ -40,9 +42,7 @@ export default function Admin() {
 
   useEffect(() => {
     // 1. Al abrir, traemos los pedidos que YA existen.
-    fetch(`${URL_BACKEND}/pedidos`)
-      .then((r) => r.json())
-      .then((datos) => setPedidos(datos));
+    obtenerJSON("/pedidos").then((datos) => setPedidos(datos));
 
     // 2. Cuando llega un pedido NUEVO, lo ponemos hasta arriba.
     socket.on("nuevo-pedido", (pedido) => {
@@ -71,11 +71,7 @@ export default function Admin() {
 
   // Le pide al backend cambiar el estado de un pedido.
   async function cambiarEstado(id, estado) {
-    await fetch(`${URL_BACKEND}/pedidos/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado: estado }),
-    });
+    await enviarJSON(`/pedidos/${id}`, "PUT", { estado: estado });
     // No actualizamos aquí: el backend nos avisa por socket y se actualiza solo.
   }
 
@@ -102,7 +98,7 @@ export default function Admin() {
             <LayoutDashboard className="h-4 w-4" /> Panel de Gerente
           </span>
           <span className="rounded-full bg-acento-suave px-3 py-1 text-sm font-semibold text-acento-oscuro">
-            {admin.nombre}
+            {gerente.nombre}
           </span>
         </div>
         <button onClick={salir} className="btn btn-ghost ml-auto">

@@ -1,4 +1,9 @@
-// la libreria de socket.io-client nos permite conectarnos al backend con WebSockets
+// ============================================================
+//  SOCKET.IO (TIEMPO REAL)
+//  Conexión con el backend para recibir avisos al instante
+//  (pedidos nuevos, cambios de estado, stock bajo).
+// ============================================================
+
 import { io } from "socket.io-client";
 import { URL_BACKEND } from "./api";
 
