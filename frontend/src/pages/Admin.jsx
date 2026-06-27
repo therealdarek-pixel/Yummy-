@@ -12,17 +12,26 @@ import {
   LogOut,
   ChevronRight,
   Inbox,
+  ClipboardList,
+  Package,
+  AlertTriangle,
+  X,
+  BarChart3,
 } from "lucide-react";
 import { socket } from "../socket";
 import { URL_BACKEND } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
 import SeguimientoPedido from "../components/SeguimientoPedido";
+import GerenteProductos from "./GerenteProductos";
+import GerenteReportes from "./GerenteReportes";
 import { ETAPAS } from "../etapas";
 
 export default function Admin() {
   const navegar = useNavigate();
-  const admin = obtenerUsuario(); // el admin que inició sesión
+  const admin = obtenerUsuario(); // el gerente que inició sesión
   const [pedidos, setPedidos] = useState([]);
+  const [pestaña, setPestaña] = useState("pedidos"); // pestaña activa del panel
+  const [alertaStock, setAlertaStock] = useState(null); // aviso de stock bajo
 
   function salir() {
     cerrarSesion();
@@ -47,10 +56,16 @@ export default function Admin() {
       );
     });
 
-    // 4. Al salir, dejamos de escuchar.
+    // 4. Cuando un producto se queda con stock bajo, mostramos el banner.
+    socket.on("stock-bajo", (producto) => {
+      setAlertaStock(producto);
+    });
+
+    // 5. Al salir, dejamos de escuchar.
     return () => {
       socket.off("nuevo-pedido");
       socket.off("pedido-actualizado");
+      socket.off("stock-bajo");
     };
   }, []);
 
@@ -84,7 +99,7 @@ export default function Admin() {
         </div>
         <div className="flex items-center gap-2 text-sm">
           <span className="inline-flex items-center gap-1.5 font-semibold text-slate-500">
-            <LayoutDashboard className="h-4 w-4" /> Panel de Admin
+            <LayoutDashboard className="h-4 w-4" /> Panel de Gerente
           </span>
           <span className="rounded-full bg-acento-suave px-3 py-1 text-sm font-semibold text-acento-oscuro">
             {admin.nombre}
@@ -95,6 +110,50 @@ export default function Admin() {
         </button>
       </header>
 
+      {/* Banner de alerta de stock bajo */}
+      {alertaStock && (
+        <div className="mb-5 flex items-center gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3.5 text-sm font-semibold text-amber-700">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <span>
+            Stock bajo: "{alertaStock.nombre}" quedó en {alertaStock.stock}{" "}
+            unidades.
+          </span>
+          <button
+            onClick={() => setAlertaStock(null)}
+            className="ml-auto text-amber-700 hover:text-amber-900"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Pestañas del panel de gerente */}
+      <div className="mb-5 flex flex-wrap gap-2">
+        <button
+          onClick={() => setPestaña("pedidos")}
+          className={"chip" + (pestaña === "pedidos" ? " chip-activo" : "")}
+        >
+          <ClipboardList className="h-3.5 w-3.5" /> Pedidos
+        </button>
+        <button
+          onClick={() => setPestaña("productos")}
+          className={"chip" + (pestaña === "productos" ? " chip-activo" : "")}
+        >
+          <Package className="h-3.5 w-3.5" /> Productos
+        </button>
+        <button
+          onClick={() => setPestaña("reportes")}
+          className={"chip" + (pestaña === "reportes" ? " chip-activo" : "")}
+        >
+          <BarChart3 className="h-3.5 w-3.5" /> Reportes
+        </button>
+      </div>
+
+      {pestaña === "productos" && <GerenteProductos />}
+
+      {pestaña === "reportes" && <GerenteReportes />}
+
+      {pestaña === "pedidos" && (
       <div className="flex flex-col gap-3">
         {pedidosActivos.length === 0 && (
           <div className="tarjeta flex flex-col items-center gap-2 p-8 text-center text-slate-400">
@@ -156,6 +215,7 @@ export default function Admin() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

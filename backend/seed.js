@@ -8,6 +8,9 @@ async function llenar() {
   await bd.collection("usuarios").deleteMany({});
   await bd.collection("restaurantes").deleteMany({});
   await bd.collection("pedidos").deleteMany({});
+  await bd.collection("productos").deleteMany({});
+  await bd.collection("ventas").deleteMany({});
+  await bd.collection("suscripciones").deleteMany({});
 
   // 2. Creamos los usuarios de ejemplo.
   await bd.collection("usuarios").insertMany([
@@ -116,6 +119,20 @@ async function llenar() {
         { nombre: "Malteada de fresa", precio: 50 },
       ],
     },
+  ]);
+
+  // 4. Creamos los productos del catálogo (con su stock).
+  //    Varios nombres coinciden con los menús para poder ligarlos a los pedidos.
+  //    Dejamos "Quesadilla" con stock 3 (bajo) para probar la alerta del bloque 4.
+  await bd.collection("productos").insertMany([
+    { nombre: "Taco de pastor", precio: 20, stock: 50, categoria: "Mexicana" },
+    { nombre: "Quesadilla", precio: 30, stock: 3, categoria: "Mexicana" },
+    { nombre: "Pizza pepperoni", precio: 120, stock: 15, categoria: "Pizza" },
+    { nombre: "Pizza hawaiana", precio: 130, stock: 8, categoria: "Pizza" },
+    { nombre: "Rollo California", precio: 95, stock: 20, categoria: "Sushi" },
+    { nombre: "Hamburguesa sencilla", precio: 70, stock: 25, categoria: "Hamburguesas" },
+    { nombre: "Refresco", precio: 18, stock: 100, categoria: "Bebidas" },
+    { nombre: "Rebanada de pastel", precio: 55, stock: 4, categoria: "Postres" },
   ]);
 
   console.log("Datos de ejemplo cargados ✅");

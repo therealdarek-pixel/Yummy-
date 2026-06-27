@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Plus, ShoppingCart, CheckCircle2 } from "lucide-react";
 import { URL_BACKEND } from "../api";
 import { obtenerUsuario } from "../sesion";
 import BarraNavegacion from "../components/BarraNavegacion";
@@ -17,6 +17,7 @@ export default function Restaurante() {
 
   const [restaurante, setRestaurante] = useState(null);
   const [carrito, setCarrito] = useState([]); // productos que va agregando
+  const [ticket, setTicket] = useState(null); // datos del ticket de confirmación
 
   useEffect(() => {
     fetch(`${URL_BACKEND}/restaurantes/${id}`)
@@ -47,8 +48,14 @@ export default function Restaurante() {
     if (datos.error) {
       alert(datos.error);
     } else {
-      alert("¡Pedido confirmado! Te llevamos a tus pedidos.");
-      navegar("/usuario/historial");
+      // Guardamos los datos del ticket para mostrar el comprobante.
+      setTicket({
+        numeroTicket: datos.numeroTicket,
+        restaurante: restaurante.nombre,
+        productos: carrito,
+        total: total,
+        fecha: new Date(),
+      });
     }
   }
 
@@ -109,6 +116,53 @@ export default function Restaurante() {
           </button>
         )}
       </div>
+
+      {/* TICKET DE CONFIRMACIÓN (modal) */}
+      {ticket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+          <div className="tarjeta w-full max-w-sm p-6">
+            <div className="mb-3 flex flex-col items-center gap-2 text-center">
+              <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+              <h3 className="font-display text-xl font-bold text-slate-800">
+                ¡Pedido confirmado!
+              </h3>
+            </div>
+
+            <div className="border-t border-slate-200 pt-3 text-sm text-slate-600">
+              <p>
+                <span className="font-semibold">Ticket:</span> {ticket.numeroTicket}
+              </p>
+              <p>
+                <span className="font-semibold">Restaurante:</span> {ticket.restaurante}
+              </p>
+              <p>
+                <span className="font-semibold">Fecha:</span>{" "}
+                {ticket.fecha.toLocaleString()}
+              </p>
+
+              <div className="mt-2">
+                <span className="font-semibold">Productos:</span>
+                {ticket.productos.map((p, i) => (
+                  <p key={i} className="ml-1 text-slate-500">
+                    • {p.nombre} (${p.precio})
+                  </p>
+                ))}
+              </div>
+
+              <p className="mt-3 text-lg font-bold text-slate-800">
+                Total: ${ticket.total}
+              </p>
+            </div>
+
+            <button
+              onClick={() => navegar("/usuario/historial")}
+              className="btn btn-primario mt-4 w-full"
+            >
+              Ver mis pedidos
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
