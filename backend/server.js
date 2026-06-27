@@ -421,27 +421,32 @@ function inicioDeSemana(fecha) {
 }
 
 // Totales de ventas agrupados por día.
-// Si llega ?fecha=AAAA-MM-DD, devuelve solo las ventas de ESE día.
+// Si llegan ?desde=AAAA-MM-DD&hasta=AAAA-MM-DD, devuelve las ventas de ese rango
+// (incluyendo ambos días). Un solo día se pide con desde y hasta iguales.
 app.get("/reportes/ventas-diarias", async (req, res) => {
   const bd = await conectar();
-  const fecha = req.query.fecha;
-  const ventas = await bd.collection("ventas").find().toArray();
+  const { desde, hasta } = req.query;
 
-  // Caso 1: pidieron un día específico -> total y lista de ese día.
-  if (fecha) {
-    const ventasDelDia = ventas.filter(
-      (venta) => new Date(venta.fecha).toISOString().slice(0, 10) === fecha
-    );
+  // Caso 1: pidieron un rango de fechas -> total y lista de ventas de ese rango.
+  if (desde && hasta) {
+    const inicio = new Date(`${desde}T00:00:00.000Z`);
+    const fin = new Date(`${hasta}T23:59:59.999Z`);
+
+    const ventasRango = await bd
+      .collection("ventas")
+      .find({ fecha: { $gte: inicio, $lte: fin } })
+      .toArray();
 
     let total = 0;
-    ventasDelDia.forEach((venta) => {
+    ventasRango.forEach((venta) => {
       total += venta.total;
     });
 
-    return res.json({ dia: fecha, total: total, ventas: ventasDelDia });
+    return res.json({ desde: desde, hasta: hasta, total: total, ventas: ventasRango });
   }
 
   // Caso 2 (por defecto): sumamos el total de cada día en un objeto { "AAAA-MM-DD": total }.
+  const ventas = await bd.collection("ventas").find().toArray();
   const porDia = {};
   ventas.forEach((venta) => {
     const dia = new Date(venta.fecha).toISOString().slice(0, 10);

@@ -153,14 +153,24 @@ Cuando un pedido se marca **"entregado"**: desaparece del panel del admin (solo
 se filtra lo que se muestra, **no se borra** de la base) y en el historial del
 usuario se ve con **fondo verde** y el mensaje **"✅ ¡Tu pedido llegó! 🎉"**.
 
-### 📊 Reportes (con calendario)
-En la pestaña **Reportes** del panel de gerente se ven las **ventas por día**, las
-**ventas por semana** y el **producto estrella** (el más vendido). Además hay un
-**calendario** (librería `react-day-picker`) para **consultar un día específico**:
-al elegir una fecha, el frontend pide el reporte de ESE día a
-`GET /reportes/ventas-diarias?fecha=AAAA-MM-DD` y muestra el total y la lista de
-ventas de ese día (o **"No hay ventas registradas este día"** si no hubo). El
-calendario usa el verde de acento de Yummy para que combine con el resto del panel.
+### 📊 Reportes (calendario por rango, tabla y gráficas)
+En la pestaña **Reportes** del panel de gerente se ven el **producto estrella** (el
+más vendido), las **ventas por día** y las **ventas por semana**.
+
+- **Calendario por rango:** un **calendario** (librería `react-day-picker`, en modo
+  `range`) para **consultar varios días**. El gerente elige un día de inicio y un día
+  de fin (o un solo día) y el frontend pide las ventas de ese rango a
+  `GET /reportes/ventas-diarias?desde=AAAA-MM-DD&hasta=AAAA-MM-DD`. El backend filtra
+  con `find()` usando `$gte`/`$lte` sobre el campo `fecha` (sin aggregate).
+- **Tabla completa de ventas:** las ventas del rango se muestran en una tabla clara
+  con columnas **Fecha y hora · Restaurante · Productos (nombre × cantidad) · Total ·
+  Pedido (id)**. Si hay muchas ventas, la tabla tiene **scroll** interno sin romper el
+  diseño.
+- **Gráficas de barras:** las ventas por día y por semana se muestran como **gráficas
+  de barras** (librería `recharts`) con el verde de acento de Yummy, manteniendo la
+  **tabla de apoyo** con los números debajo de cada gráfica.
+
+El calendario usa el verde de acento de Yummy para que combine con el resto del panel.
 
 ---
 
