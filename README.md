@@ -16,7 +16,8 @@ plano porque es una práctica escolar.
 ## 🧩 Tecnologías
 - **Backend:** Node.js + Express + MongoDB (driver nativo) + Socket.io
 - **Frontend:** React (con Vite) + CSS normal (sin librerías de UI)
-- **Base de datos:** MongoDB (3 colecciones: usuarios, restaurantes, pedidos)
+- **Base de datos:** MongoDB (6 colecciones: usuarios, restaurantes, productos,
+  pedidos, ventas, suscripciones)
 
 > La base de datos sigue llamándose internamente `didifood` (no se ve en la app);
 > la marca visible es **Yummy**.
@@ -114,15 +115,20 @@ En el historial, cada pedido tiene un botón **"Repetir pedido"** que vuelve a
 crear el mismo pedido (mismos productos y total) si te alcanza el saldo. Reusa
 la misma lógica de crear pedido.
 
-### 📦 Stock disponible en el menú
-En el menú de cada restaurante, los productos que coinciden con el catálogo
-(colección `productos`) muestran su **stock actual** junto al nombre y precio
-(ej. **"Quedan 8 disponibles"**). Si un producto está **agotado** (stock 0 o
-menos), se marca como **"Agotado"** y su botón **"Agregar" se deshabilita**. El
-backend agrega ese `stock` al vuelo en `GET /restaurantes/:id` cruzando por nombre
-con `productos` (no guarda nada nuevo). Los productos del menú que no están en el
-catálogo simplemente no muestran dato de stock. El stock se lee cada vez que se
-abre el menú (no requiere tiempo real).
+### 📦 El menú ES el catálogo de productos (con stock real)
+El **menú de cada restaurante es directamente su catálogo de `productos`**: ya no
+hay un menú embebido dentro del restaurante. Cada producto vive en la colección
+`productos` con un campo **`restauranteId`** que dice a qué restaurante pertenece.
+Cuando el usuario abre un restaurante, `GET /restaurantes/:id` busca los productos
+con ese `restauranteId` y los devuelve como el `menu` (con nombre, precio, stock y
+categoría).
+
+Así, en el menú **siempre** se ve el **stock real** de cada producto (ej.
+**"Quedan 8 disponibles"**), porque el producto del menú y el del catálogo son el
+mismo. Si un producto está **agotado** (stock 0 o menos), se marca como **"Agotado"**
+y su botón **"Agregar" se deshabilita**. Al confirmar el pedido, el descuento de
+stock usa directamente el `_id` (productoId) de cada producto del carrito. El stock
+se lee cada vez que se abre el menú (no requiere tiempo real).
 
 ### 💰 Saldo e historial
 - **Recargar saldo:** botón "➕ Recargar $100" (se refleja al instante, también
@@ -182,15 +188,21 @@ estados claros y todo **responsive** (se ve bien en celular).
 
 ---
 
-## 🗂️ Las 3 colecciones de MongoDB
-- **usuarios:** `{ nombre, correo, contraseña, saldo, esAdmin, favoritos }`
+## 🗂️ Las colecciones de MongoDB
+- **usuarios:** `{ nombre, correo, contraseña, saldo, esAdmin, favoritos, lat, lng }`
   (`favoritos` = arreglo de ids de restaurantes favoritos)
-- **restaurantes:** `{ nombre, imagen, categoria, menu: [ { nombre, precio } ] }`
-  (el menú va DENTRO del restaurante = embebido; `categoria` para los filtros)
-- **pedidos:** `{ usuarioId, usuario, restaurante, productos, total, estado, fecha, calificacion }`
-  (`calificacion` es opcional: el número de estrellas 1–5 cuando el usuario lo califica)
+- **restaurantes:** `{ nombre, imagen, categoria, lat, lng }`
+  (ya **NO** llevan menú embebido; su menú son sus `productos`)
+- **productos:** `{ nombre, precio, stock, categoria, restauranteId }`
+  (`restauranteId` = a qué restaurante pertenece; este es el menú con stock real)
+- **pedidos:** `{ usuarioId, usuario, restaurante, productos: [ { nombre, precio, productoId } ], total, estado, fecha, calificacion }`
+- **ventas:** `{ pedidoId, fecha, productos: [ { productoId, nombre, precio } ], total, restaurante }`
+- **suscripciones:** objeto de suscripción push del navegador (para el gerente)
 
-> 📌 Campos NUEVOS agregados: `categoria` (restaurantes), `favoritos` (usuarios) y
-> `calificacion` (pedidos). Para que los restaurantes de ejemplo tengan su
-> categoría, corre **`npm run seed`** de nuevo (recuerda: eso **borra y rellena**
-> las colecciones usuarios, restaurantes y pedidos).
+> 🔗 **Menú unificado:** el menú de cada restaurante son los `productos` con su
+> `restauranteId`. `GET /restaurantes/:id` los devuelve como `menu`, y al pedir se
+> descuenta el `stock` por el `productoId` de cada producto.
+
+> 📌 Después de estos cambios corre **`npm run seed`** de nuevo (recuerda: eso
+> **borra y rellena TODAS** las colecciones, incluyendo los restaurantes con sus
+> productos ya unificados).

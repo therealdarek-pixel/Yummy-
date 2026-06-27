@@ -13,9 +13,16 @@ const STOCK_BAJO = 5;
 
 export default function GerenteProductos() {
   const [productos, setProductos] = useState([]);
+  const [restaurantes, setRestaurantes] = useState([]);
 
-  // Formulario para crear un producto nuevo.
-  const [nuevo, setNuevo] = useState({ nombre: "", precio: "", stock: "", categoria: "" });
+  // Formulario para crear un producto nuevo (incluye a qué restaurante pertenece).
+  const [nuevo, setNuevo] = useState({
+    nombre: "",
+    precio: "",
+    stock: "",
+    categoria: "",
+    restauranteId: "",
+  });
 
   // Trae el catálogo desde el backend.
   function cargarProductos() {
@@ -24,7 +31,14 @@ export default function GerenteProductos() {
 
   useEffect(() => {
     cargarProductos();
+    obtenerJSON("/restaurantes").then((datos) => setRestaurantes(datos));
   }, []);
+
+  // Busca el nombre de un restaurante por su id (para mostrarlo en cada producto).
+  function nombreRestaurante(restauranteId) {
+    const encontrado = restaurantes.find((r) => r._id === restauranteId);
+    return encontrado ? encontrado.nombre : "Sin restaurante";
+  }
 
   // Crea un producto nuevo con los datos del formulario.
   async function crear(evento) {
@@ -34,8 +48,9 @@ export default function GerenteProductos() {
       precio: Number(nuevo.precio),
       stock: Number(nuevo.stock),
       categoria: nuevo.categoria,
+      restauranteId: nuevo.restauranteId,
     });
-    setNuevo({ nombre: "", precio: "", stock: "", categoria: "" });
+    setNuevo({ nombre: "", precio: "", stock: "", categoria: "", restauranteId: "" });
     cargarProductos();
   }
 
@@ -70,7 +85,7 @@ export default function GerenteProductos() {
       </h2>
 
       {/* Formulario para crear un producto nuevo */}
-      <form onSubmit={crear} className="tarjeta mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-5">
+      <form onSubmit={crear} className="tarjeta mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-6">
         <input
           className="input"
           type="text"
@@ -102,6 +117,19 @@ export default function GerenteProductos() {
           value={nuevo.categoria}
           onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}
         />
+        <select
+          className="input"
+          value={nuevo.restauranteId}
+          onChange={(e) => setNuevo({ ...nuevo, restauranteId: e.target.value })}
+          required
+        >
+          <option value="">Restaurante...</option>
+          {restaurantes.map((restaurante) => (
+            <option key={restaurante._id} value={restaurante._id}>
+              {restaurante.nombre}
+            </option>
+          ))}
+        </select>
         <button type="submit" className="btn btn-primario">
           <Plus className="h-4 w-4" /> Agregar
         </button>
@@ -114,7 +142,11 @@ export default function GerenteProductos() {
         )}
 
         {productos.map((producto) => (
-          <div key={producto._id} className="tarjeta grid grid-cols-2 items-center gap-3 p-4 sm:grid-cols-6">
+          <div key={producto._id} className="tarjeta p-4">
+            <p className="mb-2 text-xs font-semibold text-slate-400">
+              {nombreRestaurante(producto.restauranteId)}
+            </p>
+            <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-6">
             <input
               className="input"
               type="text"
@@ -158,6 +190,7 @@ export default function GerenteProductos() {
               <button onClick={() => eliminar(producto._id)} className="btn btn-ghost text-rose-500">
                 <Trash2 className="h-4 w-4" />
               </button>
+            </div>
             </div>
           </div>
         ))}

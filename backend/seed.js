@@ -38,101 +38,60 @@ async function llenar() {
     },
   ]);
 
-  // 3. Creamos los restaurantes.
+  // 3. Creamos los restaurantes (ya SIN menú embebido).
   //    Cada uno tiene "categoria" (para filtros) y "lat"/"lng" (para el mapa).
-  await bd.collection("restaurantes").insertMany([
-    {
-      nombre: "Tacos El Güero",
-      imagen: "🌮",
-      categoria: "Mexicana",
-      lat: 19.2926,
-      lng: -99.6557,
-      menu: [
-        { nombre: "Taco de pastor", precio: 20 },
-        { nombre: "Taco de bistec", precio: 25 },
-        { nombre: "Quesadilla", precio: 30 },
-        { nombre: "Refresco", precio: 18 },
-      ],
-    },
-    {
-      nombre: "Pizza Loca",
-      imagen: "🍕",
-      categoria: "Pizza",
-      lat: 19.2885,
-      lng: -99.6709,
-      menu: [
-        { nombre: "Pizza pepperoni", precio: 120 },
-        { nombre: "Pizza hawaiana", precio: 130 },
-        { nombre: "Pan de ajo", precio: 45 },
-        { nombre: "Refresco 2L", precio: 35 },
-      ],
-    },
-    {
-      nombre: "Sushi Express",
-      imagen: "🍣",
-      categoria: "Sushi",
-      lat: 19.2783,
-      lng: -99.6543,
-      menu: [
-        { nombre: "Rollo California", precio: 95 },
-        { nombre: "Rollo empanizado", precio: 110 },
-        { nombre: "Edamames", precio: 50 },
-        { nombre: "Té helado", precio: 28 },
-      ],
-    },
-    {
-      nombre: "Burger House",
-      imagen: "🍔",
-      categoria: "Hamburguesas",
-      lat: 19.3019,
-      lng: -99.6601,
-      menu: [
-        { nombre: "Hamburguesa sencilla", precio: 70 },
-        { nombre: "Hamburguesa doble", precio: 95 },
-        { nombre: "Papas a la francesa", precio: 40 },
-        { nombre: "Malteada", precio: 50 },
-      ],
-    },
-    {
-      nombre: "Antojitos Doña Rosa",
-      imagen: "🫔",
-      categoria: "Mexicana",
-      lat: 19.2701,
-      lng: -99.662,
-      menu: [
-        { nombre: "Tamal verde", precio: 22 },
-        { nombre: "Pozole chico", precio: 60 },
-        { nombre: "Sope sencillo", precio: 25 },
-        { nombre: "Agua de horchata", precio: 20 },
-      ],
-    },
-    {
-      nombre: "Dulce Tentación",
-      imagen: "🍰",
-      categoria: "Postres",
-      lat: 19.2966,
-      lng: -99.6745,
-      menu: [
-        { nombre: "Rebanada de pastel", precio: 55 },
-        { nombre: "Brownie con helado", precio: 60 },
-        { nombre: "Crepa de Nutella", precio: 65 },
-        { nombre: "Malteada de fresa", precio: 50 },
-      ],
-    },
+  const resultadoRestaurantes = await bd.collection("restaurantes").insertMany([
+    { nombre: "Tacos El Güero", imagen: "🌮", categoria: "Mexicana", lat: 19.2926, lng: -99.6557 },
+    { nombre: "Pizza Loca", imagen: "🍕", categoria: "Pizza", lat: 19.2885, lng: -99.6709 },
+    { nombre: "Sushi Express", imagen: "🍣", categoria: "Sushi", lat: 19.2783, lng: -99.6543 },
+    { nombre: "Burger House", imagen: "🍔", categoria: "Hamburguesas", lat: 19.3019, lng: -99.6601 },
+    { nombre: "Antojitos Doña Rosa", imagen: "🫔", categoria: "Mexicana", lat: 19.2701, lng: -99.662 },
+    { nombre: "Dulce Tentación", imagen: "🍰", categoria: "Postres", lat: 19.2966, lng: -99.6745 },
   ]);
 
-  // 4. Creamos los productos del catálogo (con su stock).
-  //    Varios nombres coinciden con los menús para poder ligarlos a los pedidos.
-  //    Dejamos "Quesadilla" con stock 3 (bajo) para probar la alerta del bloque 4.
+  // Guardamos el _id de cada restaurante para ligar sus productos.
+  const ids = resultadoRestaurantes.insertedIds;
+  const tacos = ids[0];
+  const pizza = ids[1];
+  const sushi = ids[2];
+  const burger = ids[3];
+  const antojitos = ids[4];
+  const postres = ids[5];
+
+  // 4. Creamos los productos del catálogo: cada uno con su "restauranteId" y su stock.
+  //    El menú de cada restaurante son estos productos. Dejamos algunos con stock
+  //    bajo (3 y 4) para probar la alerta de stock bajo.
   await bd.collection("productos").insertMany([
-    { nombre: "Taco de pastor", precio: 20, stock: 50, categoria: "Mexicana" },
-    { nombre: "Quesadilla", precio: 30, stock: 3, categoria: "Mexicana" },
-    { nombre: "Pizza pepperoni", precio: 120, stock: 15, categoria: "Pizza" },
-    { nombre: "Pizza hawaiana", precio: 130, stock: 8, categoria: "Pizza" },
-    { nombre: "Rollo California", precio: 95, stock: 20, categoria: "Sushi" },
-    { nombre: "Hamburguesa sencilla", precio: 70, stock: 25, categoria: "Hamburguesas" },
-    { nombre: "Refresco", precio: 18, stock: 100, categoria: "Bebidas" },
-    { nombre: "Rebanada de pastel", precio: 55, stock: 4, categoria: "Postres" },
+    // Tacos El Güero
+    { nombre: "Taco de pastor", precio: 20, stock: 50, categoria: "Mexicana", restauranteId: tacos },
+    { nombre: "Taco de bistec", precio: 25, stock: 40, categoria: "Mexicana", restauranteId: tacos },
+    { nombre: "Quesadilla", precio: 30, stock: 3, categoria: "Mexicana", restauranteId: tacos },
+    { nombre: "Refresco", precio: 18, stock: 100, categoria: "Bebidas", restauranteId: tacos },
+    // Pizza Loca
+    { nombre: "Pizza pepperoni", precio: 120, stock: 15, categoria: "Pizza", restauranteId: pizza },
+    { nombre: "Pizza hawaiana", precio: 130, stock: 8, categoria: "Pizza", restauranteId: pizza },
+    { nombre: "Pan de ajo", precio: 45, stock: 20, categoria: "Pizza", restauranteId: pizza },
+    { nombre: "Refresco 2L", precio: 35, stock: 30, categoria: "Bebidas", restauranteId: pizza },
+    // Sushi Express
+    { nombre: "Rollo California", precio: 95, stock: 20, categoria: "Sushi", restauranteId: sushi },
+    { nombre: "Rollo empanizado", precio: 110, stock: 12, categoria: "Sushi", restauranteId: sushi },
+    { nombre: "Edamames", precio: 50, stock: 4, categoria: "Sushi", restauranteId: sushi },
+    { nombre: "Té helado", precio: 28, stock: 40, categoria: "Bebidas", restauranteId: sushi },
+    // Burger House
+    { nombre: "Hamburguesa sencilla", precio: 70, stock: 25, categoria: "Hamburguesas", restauranteId: burger },
+    { nombre: "Hamburguesa doble", precio: 95, stock: 18, categoria: "Hamburguesas", restauranteId: burger },
+    { nombre: "Papas a la francesa", precio: 40, stock: 30, categoria: "Hamburguesas", restauranteId: burger },
+    { nombre: "Malteada", precio: 50, stock: 15, categoria: "Bebidas", restauranteId: burger },
+    // Antojitos Doña Rosa
+    { nombre: "Tamal verde", precio: 22, stock: 25, categoria: "Mexicana", restauranteId: antojitos },
+    { nombre: "Pozole chico", precio: 60, stock: 10, categoria: "Mexicana", restauranteId: antojitos },
+    { nombre: "Sope sencillo", precio: 25, stock: 5, categoria: "Mexicana", restauranteId: antojitos },
+    { nombre: "Agua de horchata", precio: 20, stock: 40, categoria: "Bebidas", restauranteId: antojitos },
+    // Dulce Tentación
+    { nombre: "Rebanada de pastel", precio: 55, stock: 4, categoria: "Postres", restauranteId: postres },
+    { nombre: "Brownie con helado", precio: 60, stock: 12, categoria: "Postres", restauranteId: postres },
+    { nombre: "Crepa de Nutella", precio: 65, stock: 10, categoria: "Postres", restauranteId: postres },
+    { nombre: "Malteada de fresa", precio: 50, stock: 15, categoria: "Bebidas", restauranteId: postres },
   ]);
 
   console.log("Datos de ejemplo cargados ✅");

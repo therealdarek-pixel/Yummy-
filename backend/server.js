@@ -159,25 +159,17 @@ app.get("/restaurantes/promedios", async (req, res) => {
   res.json(promedios);
 });
 
-// Devuelve UN restaurante por su id (con su menú adentro).
-// A cada producto del menú que coincida por nombre con el catálogo le
-// agregamos su "stock" actual (solo en la respuesta, no se guarda en la base).
+// Devuelve UN restaurante por su id. Su "menú" son los productos de la
+// colección "productos" que pertenecen a este restaurante (con su stock real).
 app.get("/restaurantes/:id", async (req, res) => {
   const bd = await conectar();
   const id = new ObjectId(req.params.id);
 
   const restaurante = await bd.collection("restaurantes").findOne({ _id: id });
 
-  // Cruzamos cada producto del menú con la colección "productos" por nombre.
-  for (const producto of restaurante.menu) {
-    const delCatalogo = await bd
-      .collection("productos")
-      .findOne({ nombre: producto.nombre });
-
-    if (delCatalogo) {
-      producto.stock = delCatalogo.stock;
-    }
-  }
+  // El menú son los productos de este restaurante (nombre, precio, stock, categoría).
+  const menu = await bd.collection("productos").find({ restauranteId: id }).toArray();
+  restaurante.menu = menu;
 
   res.json(restaurante);
 });
@@ -204,18 +196,20 @@ app.post("/pedidos", async (req, res) => {
     .collection("usuarios")
     .updateOne({ _id: idUsuario }, { $inc: { saldo: -total } });
 
-  // A cada producto del pedido le ponemos su productoId si coincide por nombre
-  // con un producto del catálogo. Si no coincide, se guarda igual que antes.
+  // Cada producto del pedido ES un producto del catálogo, así que tomamos su
+  // productoId directo de su _id (o del productoId guardado, al repetir un pedido).
   const productosDelPedido = [];
   for (const producto of productos) {
-    const delCatalogo = await bd
-      .collection("productos")
-      .findOne({ nombre: producto.nombre });
+    const idProducto = producto._id || producto.productoId;
 
-    if (delCatalogo) {
-      productosDelPedido.push({ ...producto, productoId: delCatalogo._id });
+    if (idProducto) {
+      productosDelPedido.push({
+        nombre: producto.nombre,
+        precio: producto.precio,
+        productoId: new ObjectId(idProducto),
+      });
     } else {
-      productosDelPedido.push(producto);
+      productosDelPedido.push({ nombre: producto.nombre, precio: producto.precio });
     }
   }
 
@@ -364,16 +358,17 @@ app.get("/productos", async (req, res) => {
   res.json(lista);
 });
 
-// Crea un producto nuevo (lo usa el gerente).
+// Crea un producto nuevo (lo usa el gerente). Incluye a qué restaurante pertenece.
 app.post("/productos", async (req, res) => {
   const bd = await conectar();
-  const { nombre, precio, stock, categoria } = req.body;
+  const { nombre, precio, stock, categoria, restauranteId } = req.body;
 
   const nuevo = {
     nombre: nombre,
     precio: precio,
     stock: stock,
     categoria: categoria,
+    restauranteId: restauranteId ? new ObjectId(restauranteId) : null,
   };
 
   const resultado = await bd.collection("productos").insertOne(nuevo);
