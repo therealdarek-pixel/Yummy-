@@ -113,7 +113,7 @@ export default function GerenteProductos() {
       )}
 
       {/* Formulario para crear un producto nuevo */}
-      <form onSubmit={crear} className="tarjeta mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-6">
+      <form onSubmit={crear} className="tarjeta mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-6 md:grid-cols-3">
         <input
           className="input"
           type="text"
@@ -174,7 +174,7 @@ export default function GerenteProductos() {
             <p className="mb-2 text-xs font-semibold text-slate-400">
               {nombreRestaurante(producto.restauranteId)}
             </p>
-            <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-6">
+            <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-6 md:grid-cols-2">
             <input
               className="input"
               type="text"
@@ -211,7 +211,8 @@ export default function GerenteProductos() {
               )}
             </div>
 
-            <div className="flex gap-2">
+            {/* En pantalla grande, los botones van en su propia fila al final. */}
+            <div className="flex gap-2 md:col-span-2 md:justify-end">
               <button onClick={() => guardar(producto)} className="btn btn-ghost">
                 <Save className="h-4 w-4" /> Guardar
               </button>

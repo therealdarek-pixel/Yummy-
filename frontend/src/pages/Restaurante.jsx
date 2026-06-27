@@ -46,7 +46,16 @@ export default function Restaurante() {
   }, []);
 
   // Agrega un producto al carrito.
+  // Validación simple: no dejar agregar más unidades que el stock disponible.
   function agregar(producto) {
+    const cantidadEnCarrito = carrito.filter((p) => p._id === producto._id).length;
+    const stockDisponible = producto.stock;
+
+    if (stockDisponible !== undefined && cantidadEnCarrito >= stockDisponible) {
+      alert("Ya no hay más stock disponible de este producto");
+      return;
+    }
+
     setCarrito([...carrito, producto]);
   }
 
@@ -101,6 +110,9 @@ export default function Restaurante() {
           // El stock solo viene si el producto coincide con el catálogo.
           const tieneStock = producto.stock !== undefined;
           const agotado = tieneStock && producto.stock <= 0;
+          // Si ya tiene en el carrito tantas unidades como stock, no puede agregar más.
+          const cantidadEnCarrito = carrito.filter((p) => p._id === producto._id).length;
+          const sinMasStock = tieneStock && cantidadEnCarrito >= producto.stock;
           return (
             <div
               key={i}
@@ -123,7 +135,7 @@ export default function Restaurante() {
                 <span className="font-semibold text-slate-800">${producto.precio}</span>
                 <button
                   onClick={() => agregar(producto)}
-                  disabled={agotado}
+                  disabled={agotado || sinMasStock}
                   className="btn btn-ghost"
                 >
                   <Plus className="h-4 w-4" /> Agregar
