@@ -3,7 +3,7 @@
 //sirve para mostrar el saldo, el nombre del usuario y los links a restaurantes, historial y cerrar sesión
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UtensilsCrossed, Wallet, Store, ReceiptText, LogOut } from "lucide-react";
+import { UtensilsCrossed, Wallet, Store, ReceiptText, Ticket, LogOut } from "lucide-react";
 import { obtenerJSON } from "../api";
 import { obtenerUsuario, cerrarSesion } from "../sesion";
 
@@ -54,6 +54,9 @@ export default function BarraNavegacion({ saldo }) {
         </Link>
         <Link to="/usuario/historial" className="btn btn-ghost">
           <ReceiptText className="h-4 w-4" /> Mis pedidos
+        </Link>
+        <Link to="/usuario/tickets" className="btn btn-ghost">
+          <Ticket className="h-4 w-4" /> Mis tickets
         </Link>
         <button onClick={salir} className="btn btn-ghost">
           <LogOut className="h-4 w-4" /> Salir

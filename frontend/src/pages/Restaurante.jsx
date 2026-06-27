@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, ShoppingCart, CheckCircle2 } from "lucide-react";
 import { obtenerJSON, enviarJSON } from "../api";
+import { socket } from "../socket";
 import { obtenerUsuario } from "../sesion";
 import BarraNavegacion from "../components/BarraNavegacion";
 
@@ -23,6 +24,26 @@ export default function Restaurante() {
   useEffect(() => {
     obtenerJSON(`/restaurantes/${id}`).then((datos) => setRestaurante(datos));
   }, [id]);
+
+  // Tiempo real: si cambia el stock de un producto (lo edita el gerente o se
+  // descuenta por un pedido), actualizamos el número en pantalla sin recargar.
+  useEffect(() => {
+    function alCambiarStock({ productoId, stock }) {
+      setRestaurante((actual) => {
+        if (!actual) return actual;
+        // Solo nos importa si el producto está en este menú.
+        const menu = actual.menu.map((producto) =>
+          producto._id === productoId ? { ...producto, stock: stock } : producto
+        );
+        return { ...actual, menu: menu };
+      });
+    }
+
+    socket.on("stock-actualizado", alCambiarStock);
+    return () => {
+      socket.off("stock-actualizado", alCambiarStock);
+    };
+  }, []);
 
   // Agrega un producto al carrito.
   function agregar(producto) {

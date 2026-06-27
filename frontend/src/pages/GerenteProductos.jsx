@@ -14,6 +14,7 @@ const STOCK_BAJO = 5;
 export default function GerenteProductos() {
   const [productos, setProductos] = useState([]);
   const [restaurantes, setRestaurantes] = useState([]);
+  const [mensaje, setMensaje] = useState(null); // aviso de éxito/error al guardar
 
   // Formulario para crear un producto nuevo (incluye a qué restaurante pertenece).
   const [nuevo, setNuevo] = useState({
@@ -62,14 +63,27 @@ export default function GerenteProductos() {
   }
 
   // Guarda los cambios de un producto editado.
+  // Si algo falla, lo mostramos en pantalla en vez de fallar en silencio.
   async function guardar(producto) {
-    await enviarJSON(`/productos/${producto._id}`, "PUT", {
-      nombre: producto.nombre,
-      precio: Number(producto.precio),
-      stock: Number(producto.stock),
-      categoria: producto.categoria,
-    });
-    cargarProductos();
+    try {
+      const guardado = await enviarJSON(`/productos/${producto._id}`, "PUT", {
+        nombre: producto.nombre,
+        precio: Number(producto.precio),
+        stock: Number(producto.stock),
+        categoria: producto.categoria,
+      });
+
+      // El backend devuelve el producto actualizado: si no llega, algo salió mal.
+      if (!guardado || !guardado._id) {
+        throw new Error("El servidor no confirmó el cambio.");
+      }
+
+      setMensaje({ tipo: "ok", texto: `"${guardado.nombre}" guardado (stock: ${guardado.stock}).` });
+      cargarProductos();
+    } catch (error) {
+      console.log("Error al guardar el producto:", error);
+      setMensaje({ tipo: "error", texto: "No se pudo guardar. Revisa tu conexión e inténtalo de nuevo." });
+    }
   }
 
   // Elimina un producto del catálogo.
@@ -83,6 +97,20 @@ export default function GerenteProductos() {
       <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-slate-800">
         <Package className="h-5 w-5 text-acento" /> Catálogo de productos
       </h2>
+
+      {/* Aviso de éxito o error al guardar (no falla en silencio) */}
+      {mensaje && (
+        <div
+          className={
+            "mb-4 rounded-2xl px-4 py-3 text-sm font-semibold " +
+            (mensaje.tipo === "ok"
+              ? "border border-emerald-300 bg-emerald-50 text-emerald-700"
+              : "border border-rose-300 bg-rose-50 text-rose-700")
+          }
+        >
+          {mensaje.texto}
+        </div>
+      )}
 
       {/* Formulario para crear un producto nuevo */}
       <form onSubmit={crear} className="tarjeta mb-5 grid grid-cols-2 gap-3 p-4 sm:grid-cols-6">

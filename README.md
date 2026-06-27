@@ -33,7 +33,7 @@ didi-food/
 │   └── server.js   <- todas las rutas
 └── frontend/       <- la página web (React)
     └── src/
-        ├── pages/       <- Login, Registro, Usuario, Restaurante, Historial, Admin
+        ├── pages/       <- Login, Registro, Usuario, Restaurante, Historial, MisTickets, Admin
         ├── components/  <- BarraNavegacion, SeguimientoPedido, Estrellas
         ├── api.js       <- dirección del backend
         └── socket.js
@@ -127,8 +127,12 @@ Así, en el menú **siempre** se ve el **stock real** de cada producto (ej.
 **"Quedan 8 disponibles"**), porque el producto del menú y el del catálogo son el
 mismo. Si un producto está **agotado** (stock 0 o menos), se marca como **"Agotado"**
 y su botón **"Agregar" se deshabilita**. Al confirmar el pedido, el descuento de
-stock usa directamente el `_id` (productoId) de cada producto del carrito. El stock
-se lee cada vez que se abre el menú (no requiere tiempo real).
+stock usa directamente el `_id` (productoId) de cada producto del carrito.
+
+**Stock en tiempo real:** el número de stock se actualiza **al instante**, sin
+recargar la página. Cuando el gerente edita el stock de un producto o cuando se
+descuenta por un pedido, el backend emite el evento de socket **`stock-actualizado`**
+(`{ productoId, stock }`) y el menú abierto del usuario actualiza solo ese número.
 
 ### 💰 Saldo e historial
 - **Recargar saldo:** botón "➕ Recargar $100" (se refleja al instante, también
@@ -136,10 +140,18 @@ se lee cada vez que se abre el menú (no requiere tiempo real).
 - **Ver su historial:** botón "📜 Mis pedidos". Ahí ve SUS pedidos (del más nuevo
   al más viejo) y su estado se actualiza en tiempo real cuando el admin lo cambia.
 
+### 🎟️ Mis tickets
+La pestaña **"Mis tickets"** muestra todos los pedidos del usuario como
+**comprobantes (tickets)** en formato de lista, del **más reciente al más antiguo**.
+Cada tarjeta de ticket trae **número de ticket** (el id del pedido), **restaurante**,
+**productos**, **total** y **fecha**. Reusa la ruta `GET /pedidos/usuario/:id` (los
+datos del ticket ya viven en el pedido). Es una vista enfocada en el comprobante,
+distinta de **"Mis pedidos"** (que se centra en el seguimiento con estado y mapa).
+
 ### 🧭 Navegación
 Todas las pantallas del usuario tienen una **barra superior** elegante con el
 logo **Yummy**, tu **nombre**, tu **saldo** y botones para moverte
-(**Restaurantes**, **Mis pedidos**, **Cerrar sesión**).
+(**Restaurantes**, **Mis pedidos**, **Mis tickets**, **Cerrar sesión**).
 
 ---
 
@@ -158,6 +170,14 @@ en UN SOLO lugar: `frontend/src/etapas.js`.
 Cuando un pedido se marca **"entregado"**: desaparece del panel del admin (solo
 se filtra lo que se muestra, **no se borra** de la base) y en el historial del
 usuario se ve con **fondo verde** y el mensaje **"✅ ¡Tu pedido llegó! 🎉"**.
+
+### 📦 Catálogo de productos (con guardado de stock corregido)
+En la pestaña **Productos** el gerente crea, edita y borra productos, y ve el
+**stock** de cada uno (con aviso de **stock bajo**). Al editar y dar **"Guardar"**,
+el frontend llama a `PUT /productos/:id` y el backend **devuelve el producto
+actualizado** para confirmar el cambio; si algo falla, se muestra un **mensaje
+visible** (ya no falla en silencio). Cada guardado emite `stock-actualizado`, así
+que el menú del usuario refleja el nuevo stock **al instante**.
 
 ### 📊 Reportes (calendario por rango, tabla y gráficas)
 En la pestaña **Reportes** del panel de gerente se ven el **producto estrella** (el

@@ -253,13 +253,19 @@ app.post("/pedidos", async (req, res) => {
     restaurante: restaurante,
   });
 
-  // Revisamos si algún producto quedó con stock bajo (5 o menos) y avisamos:
-  // banner por socket al gerente + notificación push (bloque 5).
+  // Revisamos cada producto descontado: avisamos su nuevo stock en tiempo real
+  // (para el menú del usuario) y, si quedó bajo (5 o menos), alertamos al gerente.
   for (const item of productosDelPedido) {
     if (item.productoId) {
       const actualizado = await bd
         .collection("productos")
         .findOne({ _id: item.productoId });
+
+      // Tiempo real: mismo evento que usa la edición del gerente.
+      io.emit("stock-actualizado", {
+        productoId: item.productoId.toString(),
+        stock: actualizado.stock,
+      });
 
       if (actualizado.stock <= 5) {
         io.emit("stock-bajo", {
@@ -378,6 +384,8 @@ app.post("/productos", async (req, res) => {
 });
 
 // Actualiza un producto (nombre, precio, stock o categoría).
+// Devuelve el producto ya actualizado para que el frontend confirme el cambio,
+// y avisa por socket el nuevo stock para que el menú del usuario se actualice solo.
 app.put("/productos/:id", async (req, res) => {
   const bd = await conectar();
   const id = new ObjectId(req.params.id);
@@ -388,7 +396,16 @@ app.put("/productos/:id", async (req, res) => {
     { $set: { nombre: nombre, precio: precio, stock: stock, categoria: categoria } }
   );
 
-  res.json({ ok: true });
+  // Leemos el producto ya actualizado para responderlo y para avisar el stock real.
+  const actualizado = await bd.collection("productos").findOne({ _id: id });
+
+  // Tiempo real: avisamos el nuevo stock de este producto (lo escucha el menú).
+  io.emit("stock-actualizado", {
+    productoId: id.toString(),
+    stock: actualizado.stock,
+  });
+
+  res.json(actualizado);
 });
 
 // Elimina un producto del catálogo.

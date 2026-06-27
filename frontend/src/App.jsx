@@ -11,6 +11,7 @@ import Registro from "./pages/Registro.jsx";
 import Usuario from "./pages/Usuario.jsx";
 import Restaurante from "./pages/Restaurante.jsx";
 import Historial from "./pages/Historial.jsx";
+import MisTickets from "./pages/MisTickets.jsx";
 import Admin from "./pages/Admin.jsx";
 import { obtenerUsuario } from "./sesion";
 
@@ -33,6 +34,10 @@ export default function App() {
       <Route
         path="/usuario/historial"
         element={<Protegida><Historial /></Protegida>}
+      />
+      <Route
+        path="/usuario/tickets"
+        element={<Protegida><MisTickets /></Protegida>}
       />
 
       {/* Lado del ADMIN (protegido y solo para admins) */}
